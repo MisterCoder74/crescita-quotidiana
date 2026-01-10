@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generatore di Mandala</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.container:hover {
+    transform: translateY(-5px);
+}
+
+h1 {
+    color: white;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    font-weight: 700;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #fff 0%, #f0f8ff 100%);
+    -webkit-background-clip: text;
+    
+    background-clip: text;
+}
+
+.subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1em;
+    margin-bottom: 30px;
+    font-weight: 300;
+}
+
+.canvas-container {
+    position: relative;
+    display: inline-block;
+    margin: 20px 0;
+}
+
+canvas {
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    background: radial-gradient(circle at center, #fafafa 0%, #e8e8e8 100%);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+canvas:hover {
+    transform: scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+        
+a {
+position: relative;
+z-index: 10;
+}
+        
+
+button {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(238, 90, 36, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(238, 90, 36, 0.4);
+    background: linear-gradient(135deg, #ff7979 0%, #f39c12 100%);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.secondary-btn {
+    background: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%);
+    box-shadow: 0 8px 25px rgba(84, 160, 255, 0.3);
+}
+
+.secondary-btn:hover {
+    background: linear-gradient(135deg, #26de81 0%, #00d2d3 100%);
+    box-shadow: 0 12px 35px rgba(84, 160, 255, 0.4);
+}
+
+.download-btn {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    color: #2d3436;
+    box-shadow: 0 8px 25px rgba(168, 237, 234, 0.3);
+}
+
+.download-btn:hover {
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    color: white;
+    box-shadow: 0 12px 35px rgba(116, 185, 255, 0.4);
+}
+
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.floating {
+    animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    canvas {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    button {
+        width: 100%;
+        max-width: 250px;
+    }
+}
+</style>
+</head>
+<body>
+<div class="container fade-in">
+    <h1 class="floating">☸️ Generatore di Mandala</h1>
+    <p class="subtitle">Crea opere d'arte geometriche uniche e affascinanti</p>
+        <a href="./dashboard.html">← Torna alla Dashboard</a>
+    
+    <div class="canvas-container">
+        <canvas id="mandalaCanvas"></canvas>
+    </div>
+    
+    <div class="controls">
+        <button id="generateButton">🎨 Genera Nuovo</button>
+        <button id="downloadButton" class="download-btn">💾 Scarica</button><br>            
+<button id="animateButton">⚡ Start Animation</button>
+<button id="stopButton" style="display: none;">⏹ Stop Animation</button>
+
+    </div>
+</div>
+
+<script>
+// Inizializza il canvas e i pulsanti
+const canvas = document.getElementById('mandalaCanvas');
+const ctx = canvas.getContext('2d');
+const generateBtn = document.getElementById('generateButton');
+const animateBtn = document.getElementById('animateButton');
+const stopBtn = document.getElementById('stopButton');
+const downloadBtn = document.getElementById('downloadButton');
+
+let isAnimating = false;
+let animationId = null;
+let currentMandalaData = null;
+
+// Imposta dimensioni canvas responsive
+const setCanvasSize = () => {
+    const size = Math.min(window.innerWidth - 100, 500);
+    canvas.width = size;
+    canvas.height = size;
+};
+
+setCanvasSize();
+window.addEventListener('resize', () => {
+    setCanvasSize();
+    drawMandala();
+});
+
+
+
+function getRandomColor() {
+    const palettes = [
+        // Palette più ricche per mandala geometrici
+        ['#1e3a8a', '#3b82f6', '#06b6d4', '#10b981', '#84cc16'],
+        ['#7c3aed', '#a855f7', '#ec4899', '#f59e0b', '#06b6d4'],
+        ['#059669', '#0d9488', '#0891b2', '#3b82f6', '#6366f1'],
+        ['#dc2626', '#ea580c', '#d97706', '#ca8a04', '#65a30d'],
+        ['#4338ca', '#7c2d12', '#be123c', '#be185d', '#a21caf']
+    ];
+    
+    const palette = palettes[Math.floor(Math.random() * palettes.length)];
+    return palette[Math.floor(Math.random() * palette.length)];
+}
+
+function drawGeometricPetal(ctx, innerRadius, outerRadius, petalWidth, complexity = 1) {
+    ctx.beginPath();
+    
+    // Punto di partenza
+    const startAngle = -petalWidth / 2;
+    const endAngle = petalWidth / 2;
+    const midRadius = (innerRadius + outerRadius) / 2;
+    
+    // Inizia dal punto interno sinistro
+    ctx.moveTo(
+        innerRadius * Math.cos(startAngle),
+        innerRadius * Math.sin(startAngle)
+    );
+    
+    // Curva esterna sinistra
+    ctx.quadraticCurveTo(
+        midRadius * Math.cos(startAngle * 0.5),
+        midRadius * Math.sin(startAngle * 0.5),
+        outerRadius * Math.cos(0),
+        outerRadius * Math.sin(0)
+    );
+    
+    // Curva esterna destra
+    ctx.quadraticCurveTo(
+        midRadius * Math.cos(endAngle * 0.5),
+        midRadius * Math.sin(endAngle * 0.5),
+        innerRadius * Math.cos(endAngle),
+        innerRadius * Math.sin(endAngle)
+    );
+    
+    // Curva interna di chiusura
+    ctx.quadraticCurveTo(
+        (innerRadius * 0.7) * Math.cos(0),
+        (innerRadius * 0.7) * Math.sin(0),
+        innerRadius * Math.cos(startAngle),
+        innerRadius * Math.sin(startAngle)
+    );
+    
+    ctx.closePath();
+}
+
+function drawDecorativeElements(ctx, radius, segments, seedValue) {
+    const angleStep = (Math.PI * 2) / segments;
+    
+    for (let i = 0; i < segments; i++) {
+        ctx.save();
+        ctx.rotate(i * angleStep);
+        
+        // Piccoli cerchi decorativi
+        ctx.beginPath();
+        ctx.arc(radius * 0.8, 0, 3, 0, Math.PI * 2);
+        ctx.fillStyle = getRandomColor();
+        ctx.globalAlpha = 0.8;
+        ctx.fill();
+        
+        // Linee radiali decorative
+        ctx.beginPath();
+        ctx.moveTo(radius * 0.6, 0);
+        ctx.lineTo(radius * 0.9, 0);
+        ctx.strokeStyle = getRandomColor();
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.6;
+        ctx.stroke();
+        
+        // Piccoli diamanti
+        if (i % 2 === 0) {
+            ctx.beginPath();
+            ctx.moveTo(radius * 0.7, 0);
+            ctx.lineTo(radius * 0.75, -4);
+            ctx.lineTo(radius * 0.8, 0);
+            ctx.lineTo(radius * 0.75, 4);
+            ctx.closePath();
+            ctx.fillStyle = getRandomColor();
+            ctx.globalAlpha = 0.9;
+            ctx.fill();
+        }
+        
+        ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+}
+
+function drawMandala(animationStep = 1) {
+    // Salva i dati del mandala solo se non è per l'animazione
+    if (animationStep === 1 && !currentMandalaData) {
+        currentMandalaData = {
+            seed: Math.random(),
+            layers: Math.floor(Math.random() * 8) + 6
+        };
+    }
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Sfondo gradiente più elegante
+    const gradient = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2, 0,
+        canvas.width / 2, canvas.height / 2, canvas.width / 2
+    );
+    gradient.addColorStop(0, '#fefefe');
+    gradient.addColorStop(0.7, '#f8fafc');
+    gradient.addColorStop(1, '#e2e8f0');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const layers = currentMandalaData ? currentMandalaData.layers : Math.floor(Math.random() * 8) + 6;
+    const maxRadius = Math.min(canvas.width, canvas.height) * 0.42;
+    
+    let seedValue = currentMandalaData ? currentMandalaData.seed : Math.random();
+    
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    
+    // Disegna i layer dall'esterno verso l'interno
+    for (let layer = layers - 1; layer >= 0; layer--) {
+        const baseRadius = ((layer + 1) / layers) * maxRadius * animationStep;
+        const innerRadius = Math.max(baseRadius * 0.6, 20);
+        const outerRadius = baseRadius;
+        
+        // Numero di petali variabile per layer
+        const segments = Math.floor(seedValue * 8) + 8 + (layer % 4) * 2;
+        const angleStep = (Math.PI * 2) / segments;
+        const petalWidth = angleStep * 0.8;
+        
+        // Colore del layer
+        const layerColor = getRandomColor();
+        const secondaryColor = getRandomColor();
+        
+        // Disegna i petali principali
+        for (let i = 0; i < segments; i++) {
+            ctx.save();
+            ctx.rotate(i * angleStep + (layer * 0.1)); // Leggera rotazione tra i layer
+            
+            // Gradiente per il petalo
+            const petalGradient = ctx.createLinearGradient(innerRadius, 0, outerRadius, 0);
+            petalGradient.addColorStop(0, layerColor + '90');
+            petalGradient.addColorStop(0.5, layerColor);
+            petalGradient.addColorStop(1, secondaryColor + '70');
+            
+            drawGeometricPetal(ctx, innerRadius, outerRadius, petalWidth);
+            ctx.fillStyle = petalGradient;
+            ctx.fill();
+            
+            // Bordo del petalo
+            ctx.strokeStyle = layerColor;
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.8;
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        // Petali secondari (più piccoli, sfalsati)
+        if (layer % 2 === 0) {
+            for (let i = 0; i < segments; i++) {
+                ctx.save();
+                ctx.rotate((i + 0.5) * angleStep + (layer * 0.1));
+                
+                drawGeometricPetal(ctx, innerRadius * 0.8, outerRadius * 0.9, petalWidth * 0.6);
+                ctx.fillStyle = secondaryColor + '60';
+                ctx.fill();
+                ctx.strokeStyle = secondaryColor;
+                ctx.lineWidth = 1;
+                ctx.globalAlpha = 0.7;
+                ctx.stroke();
+                
+                ctx.restore();
+            }
+        }
+        
+        // Elementi decorativi
+        if (layer % 3 === 0) {
+            drawDecorativeElements(ctx, baseRadius * 0.85, segments, seedValue);
+        }
+        
+        // Cerchio di separazione tra layer
+        ctx.beginPath();
+        ctx.arc(0, 0, innerRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = layerColor;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.3;
+        ctx.stroke();
+        
+        ctx.globalAlpha = 1;
+        seedValue = (seedValue * 9301 + 49297) % 233280 / 233280;
+    }
+    
+    // Centro decorativo elaborato
+    const centerRadius = 25;
+    
+    // Cerchio centrale con gradiente
+    const centerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, centerRadius);
+    const centerColor = getRandomColor();
+    centerGradient.addColorStop(0, centerColor);
+    centerGradient.addColorStop(1, centerColor + '40');
+    
+    ctx.beginPath();
+    ctx.arc(0, 0, centerRadius, 0, Math.PI * 2);
+    ctx.fillStyle = centerGradient;
+    ctx.fill();
+    
+    // Anello decorativo centrale
+    ctx.beginPath();
+    ctx.arc(0, 0, centerRadius * 0.7, 0, Math.PI * 2);
+    ctx.strokeStyle = getRandomColor();
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    // Piccoli petali centrali
+    for (let i = 0; i < 8; i++) {
+        ctx.save();
+        ctx.rotate((i * Math.PI) / 4);
+        
+        ctx.beginPath();
+        ctx.ellipse(centerRadius * 0.5, 0, centerRadius * 0.2, centerRadius * 0.1, 0, 0, Math.PI * 2);
+        ctx.fillStyle = getRandomColor();
+        ctx.fill();
+        
+        ctx.restore();
+    }
+    
+    // Punto centrale
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.strokeStyle = centerColor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    ctx.restore();
+}
+function animateMandala() {
+    animateBtn.style.display = 'none';
+    stopBtn.style.display = 'inline-block';         
+    
+    if (isAnimating) return; // Se già in animazione, non fare nulla
+    
+    isAnimating = true;
+    animateBtn.disabled = true; // Disabilita il pulsante di animazione
+    stopBtn.disabled = false; // Abilita il pulsante di stop
+    
+    let step = 0;
+    let frameCount = 0;
+    const frameSkip = 3; // Disegna ogni 2 frame (30 FPS invece di 60)
+    
+    const animate = () => {
+        if (!isAnimating) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+            return;
+        }
+        
+        frameCount++;
+        if (frameCount % frameSkip === 0) {
+            step += 0.02; // Aumenta il passo
+            const animationStep = (Math.sin(step) + 1) / 2 * 0.8 + 0.2;
+            drawMandala(animationStep);
+        }
+        
+        animationId = requestAnimationFrame(animate);
+    };
+    
+    animationId = requestAnimationFrame(animate);
+}
+        
+function stopAnimation() {
+animateBtn.style.display= 'inline-block';
+stopBtn.style.display= 'none';         
+isAnimating = false; // Ferma l'animazione
+if (animationId) {
+cancelAnimationFrame(animationId);
+animationId = null;
+}
+animateBtn.disabled = false; // Riabilita il pulsante di animazione
+stopBtn.disabled = true; // Disabilita il pulsante di stop
+}        
+
+
+function downloadCanvas() {
+    const link = document.createElement('a');
+    link.download = `mandala-${Date.now()}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+}
+
+// Event listeners
+animateBtn.addEventListener('click', animateMandala);
+stopBtn.addEventListener('click', stopAnimation);
+downloadBtn.addEventListener('click', downloadCanvas);
+generateBtn.addEventListener('click', () => {
+if (isAnimating) stopAnimation(); // Ferma l'animazione se attiva
+currentMandalaData = null; // Reset dei dati per nuovo mandala
+generateBtn.classList.add('loading');
+setTimeout(() => {
+drawMandala();
+generateBtn.classList.remove('loading');
+}, 200);
+});
+
+// Genera mandala iniziale
+drawMandala();
+
+</script>
+</body>
+</html>

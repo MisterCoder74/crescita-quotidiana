@@ -1,0 +1,663 @@
+<?php
+ini_set('session.name', 'LC_IDENTIFIER');
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+header('Location: index.html');
+exit;
+}
+
+$username = $_SESSION['name'] ?? $_SESSION['email'] ?? 'User';
+$userEmail = $_SESSION['email'] ?? '';
+$userPicture = $_SESSION['profile_picture'] ?? '';
+$birthdate = $_SESSION['data_nascita'];
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Biorhythms</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
+            margin-left: 15px;
+        }
+
+        .save-btn:hover {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%) !important;
+        }
+
+        .results-section {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .biorhythm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .biorhythm-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .biorhythm-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .biorhythm-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            color: #444;
+        }
+
+        .percentage {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .physical .percentage { color: #e74c3c; }
+        .emotional .percentage { color: #3498db; }
+        .intellectual .percentage { color: #2ecc71; }
+
+        .status {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .chart-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            color: #444;
+            font-weight: 600;
+        }
+
+        .today-indicator {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .inspiration-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .quote {
+            font-size: 1.4em;
+            font-style: italic;
+            color: #444;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .quote-author {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .inspiration-image {
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .button-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .biorhythm-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .save-btn {
+                margin-left: 0;
+                margin-top: 10px;
+                display: block;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Calcolo Bioritmi</h1>
+            <p>Scopri i tuoi cicli naturali ed ottimizza il tuo potenziale</p>
+                  <a href="dashboard.php">← Torna alla Dashboard</a>
+        </div>
+
+        <div class="input-section">
+            <form id="biorhythmForm">
+                <div class="form-group">
+                    <label for="birthdate">La tua data di Nascita:</label>
+                    <input type="date" id="birthdate" name="birthdate" required value="<?php echo $birthdate; ?>">
+                </div>
+                <div class="form-group">
+                    <label for="name">Il tuo Nome (opzionale):</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your name" value="<?php echo $username; ?>">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="calculate-btn">Calcola!</button>
+                    <button type="button" id="saveBtn" class="calculate-btn save-btn" onclick="saveBiorhythms()" style="display: none;">
+                        💾 Salva Bioritmi
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="results" class="results-section">
+            <h2>I tuoi bioritmi per oggi</h2>
+            <div id="currentDate"></div>
+            
+            <div class="biorhythm-grid">
+                <div class="biorhythm-card physical">
+                    <h3>💪 Ciclo Fisico</h3>
+                    <div class="percentage" id="physicalPercent">0%</div>
+                    <div class="status" id="physicalStatus">Calcolo...</div>
+                    <div class="description" id="physicalDesc">La tua forza e resistenza fisica</div>
+                </div>
+                
+                <div class="biorhythm-card emotional">
+                    <h3>❤️ Ciclo Emozionale</h3>
+                    <div class="percentage" id="emotionalPercent">0%</div>
+                    <div class="status" id="emotionalStatus">Calcolo...</div>
+                    <div class="description" id="emotionalDesc">Il tuo umore, sentimenti ed emozioni.</div>
+                </div>
+                
+                <div class="biorhythm-card intellectual">
+                    <h3>🧠 Ciclo Intellettivo</h3>
+                    <div class="percentage" id="intellectualPercent">0%</div>
+                    <div class="status" id="intellectualStatus">Calcolo...</div>
+                    <div class="description" id="intellectualDesc">La tua chiarezza mentale, il focus e la concentrazione.</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Carta dei Bioritmi - Vista a 30 giorni</div>
+                
+                <canvas id="biorhythmChart" width="1000" height="400"></canvas>
+            </div>
+        </div>
+
+        <div id="inspiration" class="inspiration-section" style="display: none;">
+            <h2>🌈 Le riflessioni di oggi</h2>
+            <div class="quote" id="inspirationQuote">Carico frasi di Ispirazione...</div>
+            <div class="quote-author" id="quoteAuthor"></div>
+            <img id="inspirationImage" class="inspiration-image" alt="Inspirational image" style="display: none;">
+        </div>
+    </div>
+
+    <script>
+        class BiorhythmCalculator {
+            constructor() {
+                this.form = document.getElementById('biorhythmForm');
+                this.resultsSection = document.getElementById('results');
+                this.inspirationSection = document.getElementById('inspiration');
+                this.init();
+            }
+
+            init() {
+                this.form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.calculateBiorhythms();
+                });
+            }
+
+            async calculateBiorhythms() {
+                const birthdate = document.getElementById('birthdate').value;
+                const name = document.getElementById('name').value;
+
+                if (!birthdate) {
+                    alert('Please enter your birth date');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('calculate.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            birthdate: birthdate,
+                            name: name
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.displayResults(data);
+                        this.drawChart(data.biorhythms);
+                        await this.loadInspiration(data.dominantCycle);
+                        
+                        // Mostra il pulsante di salvataggio
+                        document.getElementById('saveBtn').style.display = 'inline-block';
+                    } else {
+                        alert('Error calculating biorhythms: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error connecting to server');
+                }
+            }
+
+            displayResults(data) {
+                const currentDate = new Date().toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                document.getElementById('currentDate').innerHTML = `<h3>${currentDate}</h3>`;
+                
+                // Physical
+                document.getElementById('physicalPercent').textContent = `${data.biorhythms.physical.percentage}%`;
+                document.getElementById('physicalStatus').textContent = data.biorhythms.physical.status;
+                document.getElementById('physicalDesc').textContent = data.biorhythms.physical.description;
+
+                // Emotional
+                document.getElementById('emotionalPercent').textContent = `${data.biorhythms.emotional.percentage}%`;
+                document.getElementById('emotionalStatus').textContent = data.biorhythms.emotional.status;
+                document.getElementById('emotionalDesc').textContent = data.biorhythms.emotional.description;
+
+                // Intellectual
+                document.getElementById('intellectualPercent').textContent = `${data.biorhythms.intellectual.percentage}%`;
+                document.getElementById('intellectualStatus').textContent = data.biorhythms.intellectual.status;
+                document.getElementById('intellectualDesc').textContent = data.biorhythms.intellectual.description;
+
+                this.resultsSection.style.display = 'block';
+            }
+
+            drawChart(biorhythms) {
+                const canvas = document.getElementById('biorhythmChart');
+                const ctx = canvas.getContext('2d');
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const width = canvas.width;
+                const height = canvas.height;
+                const centerY = height / 2;
+                
+                // Draw grid
+                ctx.strokeStyle = '#e0e0e0';
+                ctx.lineWidth = 1;
+                
+                // Horizontal lines
+                for (let i = 0; i <= 10; i++) {
+                    const y = (height / 10) * i;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+                
+                // Vertical lines
+                for (let i = 0; i <= 30; i++) {
+                    const x = (width / 30) * i;
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
+                }
+                
+                // Center line
+                ctx.strokeStyle = '#666';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, centerY);
+                ctx.lineTo(width, centerY);
+                ctx.stroke();
+                
+                // Draw biorhythm curves for 30 days
+                const today = new Date();
+                const birthDate = new Date(document.getElementById('birthdate').value);
+                
+                this.drawBiorhythmCurve(ctx, birthDate, today, 23, '#e74c3c', width, height, centerY, 'Physical');
+                this.drawBiorhythmCurve(ctx, birthDate, today, 28, '#3498db', width, height, centerY, 'Emotional');
+                this.drawBiorhythmCurve(ctx, birthDate, today, 33, '#2ecc71', width, height, centerY, 'Intellectual');
+                
+                // Draw TODAY marker (vertical line in the center)
+                const todayX = width / 2;
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 4;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(todayX, 10);
+                ctx.lineTo(todayX, height - 10);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Add TODAY label at the bottom
+                ctx.fillStyle = '#ff6b6b';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('OGGI', todayX, height - 5);
+                
+                // Draw current day markers (circles) on each curve
+                this.drawTodayMarkers(ctx, birthDate, today, width, height, centerY);
+                
+                // Add percentage labels
+                ctx.fillStyle = '#666';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText('100%', width - 5, 15);
+                ctx.fillText('50%', width - 5, centerY - 5);
+                ctx.fillText('0%', width - 5, height - 5);
+                
+                // Add legend
+                this.drawLegend(ctx, width, height);
+            }
+
+            drawBiorhythmCurve(ctx, birthDate, startDate, cycle, color, width, height, centerY, label) {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                
+                for (let day = 0; day < 30; day++) {
+                    const currentDate = new Date(startDate);
+                    currentDate.setDate(currentDate.getDate() + day - 15); // Center today in the middle
+                    
+                    const daysSinceBirth = Math.floor((currentDate - birthDate) / (1000 * 60 * 60 * 24));
+                    const value = Math.sin((2 * Math.PI * daysSinceBirth) / cycle);
+                    
+                    const x = (width / 30) * day;
+                    const y = centerY - (value * (height / 2 - 20));
+                    
+                    if (day === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                
+                ctx.stroke();
+            }
+
+            drawTodayMarkers(ctx, birthDate, today, width, height, centerY) {
+                const todayX = width / 2;
+                const daysSinceBirth = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+                
+                // Calculate values for today
+                const physicalValue = Math.sin((2 * Math.PI * daysSinceBirth) / 23);
+                const emotionalValue = Math.sin((2 * Math.PI * daysSinceBirth) / 28);
+                const intellectualValue = Math.sin((2 * Math.PI * daysSinceBirth) / 33);
+                
+                // Draw markers
+                const markers = [
+                    { value: physicalValue, color: '#e74c3c' },
+                    { value: emotionalValue, color: '#3498db' },
+                    { value: intellectualValue, color: '#2ecc71' }
+                ];
+                
+                markers.forEach(marker => {
+                    const y = centerY - (marker.value * (height / 2 - 20));
+                    
+                    // Draw circle
+                    ctx.fillStyle = marker.color;
+                    ctx.beginPath();
+                    ctx.arc(todayX, y, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Draw white border
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                });
+            }
+
+            drawLegend(ctx, width, height) {
+                const legends = [
+                    { color: '#e74c3c', label: 'Physical (23 days)' },
+                    { color: '#3498db', label: 'Emotional (28 days)' },
+                    { color: '#2ecc71', label: 'Intellectual (33 days)' }
+                ];
+                
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'left';
+                legends.forEach((legend, index) => {
+                    const y = height - 50 + (index * 18);
+                    
+                    ctx.fillStyle = legend.color;
+                    ctx.fillRect(10, y - 10, 15, 10);
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.fillText(legend.label, 30, y - 2);
+                });
+            }
+
+            async loadInspiration(dominantCycle) {
+                try {
+                    const response = await fetch('inspiration.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            cycle: dominantCycle
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        document.getElementById('inspirationQuote').textContent = `"${data.quote.text}"`;
+                        document.getElementById('quoteAuthor').textContent = `— ${data.quote.author}`;
+                        
+                        const img = document.getElementById('inspirationImage');
+                        img.src = data.image.url;
+                        img.alt = data.image.description;
+                        img.style.display = 'block';
+                        
+                        this.inspirationSection.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Error loading inspiration:', error);
+                }
+            }
+        }
+
+        // Funzione per salvare i bioritmi
+        function saveBiorhythms() {
+            const birthdate = document.getElementById('birthdate').value;
+            const name = document.getElementById('name').value || 'Anonimo';
+            
+            if (!birthdate) {
+                alert('Calcola prima i bioritmi!');
+                return;
+            }
+            
+            // Ottieni i valori correnti
+            const physical = document.getElementById('physicalPercent').textContent;
+            const emotional = document.getElementById('emotionalPercent').textContent;
+            const intellectual = document.getElementById('intellectualPercent').textContent;
+            
+            const data = {
+                nome: name,
+                dataNascita: birthdate,
+                dataCalcolo: new Date().toISOString().split('T')[0],
+                bioritmi: {
+                    fisico: physical,
+                    emotivo: emotional,
+                    intellettuale: intellectual
+                }
+            };
+            
+            fetch('save_biorhythms.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Bioritmi salvati con successo!');
+                } else {
+                    alert('Errore nel salvataggio: ' + result.error);
+                }
+            })
+            .catch(error => {
+                console.error('Errore:', error);
+                alert('Errore di connessione');
+            });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new BiorhythmCalculator();
+        });
+    </script>
+</body>
+</html>

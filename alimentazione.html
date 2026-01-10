@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente Alimentare</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+            
+            .header a {
+                position: relative;
+                z-index: 10;
+                }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .habits-section {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .habits-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .habits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-group:hover {
+            background: #e3f2fd;
+            transform: translateY(-1px);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            font-weight: 500;
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            display: none;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bmi-display {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .bmi-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .bmi-category {
+            font-size: 1.4rem;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .advice-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border-left: 5px solid #4facfe;
+        }
+
+        .advice-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .advice-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .advice-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .advice-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4facfe;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .advice-list li:last-child {
+            border-bottom: none;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .bmi-value {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Assistente Alimentare</h1>
+            <p>Scopri il tuo Indice di Massa Corporea e ricevi consigli personalizzati</p>
+                <a href="./dashboard.html">← Torna alla Dashboard</a>
+        </div>
+
+        <div class="form-container">
+            <form id="bmiForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="age">Età (anni)</label>
+                        <input type="number" id="age" min="10" max="120" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">Sesso</label>
+                        <select id="gender" required>
+                            <option value="">Seleziona...</option>
+                            <option value="male">Maschio</option>
+                            <option value="female">Femmina</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height">Altezza (cm)</label>
+                        <input type="number" id="height" min="100" max="250" step="0.1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight">Peso (kg)</label>
+                        <input type="number" id="weight" min="30" max="300" step="0.1" required>
+                    </div>
+
+                    <div class="habits-section">
+                        <h3>🍽️ Abitudini Alimentari</h3>
+                        <div class="habits-grid">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="vegetarian" name="habits" value="vegetarian">
+                                <label for="vegetarian">Vegetariano/Vegano</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="fastFood" name="habits" value="fastFood">
+                                <label for="fastFood">Consumo frequente fast food</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="sweetDrinks" name="habits" value="sweetDrinks">
+                                <label for="sweetDrinks">Bevande zuccherate quotidiane</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="irregularMeals" name="habits" value="irregularMeals">
+                                <label for="irregularMeals">Pasti irregolari</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="lateNightEating" name="habits" value="lateNightEating">
+                                <label for="lateNightEating">Mangio spesso la sera tardi</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="lowWaterIntake" name="habits" value="lowWaterIntake">
+                                <label for="lowWaterIntake">Bevo poca acqua</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="highSaltIntake" name="habits" value="highSaltIntake">
+                                <label for="highSaltIntake">Consumo molto sale/cibi salati</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="lowFiberIntake" name="habits" value="lowFiberIntake">
+                                <label for="lowFiberIntake">Mangio poche fibre (frutta/verdura)</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="alcoholConsumption" name="habits" value="alcoholConsumption">
+                                <label for="alcoholConsumption">Consumo alcolici regolarmente</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="skipBreakfast" name="habits" value="skipBreakfast">
+                                <label for="skipBreakfast">Salto spesso la colazione</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="processedFoods" name="habits" value="processedFoods">
+                                <label for="processedFoods">Mangio spesso cibi processati</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="emotionalEating" name="habits" value="emotionalEating">
+                                <label for="emotionalEating">Mangio per stress/emozioni</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="fastEating" name="habits" value="fastEating">
+                                <label for="fastEating">Mangio molto velocemente</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="highCaffeine" name="habits" value="highCaffeine">
+                                <label for="highCaffeine">Bevo molto caffè/tè/energy drink</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="habits-section">
+                        <h3>🏥 Patologie e Condizioni Mediche</h3>
+                        <div class="habits-grid">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="constipation" name="conditions" value="constipation">
+                                <label for="constipation">Stitichezza</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="highPressure" name="conditions" value="highPressure">
+                                <label for="highPressure">Pressione alta (ipertensione)</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="lowPressure" name="conditions" value="lowPressure">
+                                <label for="lowPressure">Pressione bassa (ipotensione)</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="insomnia" name="conditions" value="insomnia">
+                                <label for="insomnia">Insonnia</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="gastricReflux" name="conditions" value="gastricReflux">
+                                <label for="gastricReflux">Reflusso gastroesofageo</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="irritableBowel" name="conditions" value="irritableBowel">
+                                <label for="irritableBowel">Colon irritabile</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="diabetes" name="conditions" value="diabetes">
+                                <label for="diabetes">Diabete tipo 2</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="prediabetes" name="conditions" value="prediabetes">
+                                <label for="prediabetes">Pre-diabete</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="anemia" name="conditions" value="anemia">
+                                <label for="anemia">Anemia</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="thyroidIssues" name="conditions" value="thyroidIssues">
+                                <label for="thyroidIssues">Problemi tiroidei</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="highCholesterol" name="conditions" value="highCholesterol">
+                                <label for="highCholesterol">Colesterolo alto</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="gastritis" name="conditions" value="gastritis">
+                                <label for="gastritis">Gastrite</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="foodIntolerance" name="conditions" value="foodIntolerance">
+                                <label for="foodIntolerance">Intolleranze alimentari</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="kidneyStones" name="conditions" value="kidneyStones">
+                                <label for="kidneyStones">Calcoli renali</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="calculate-btn">Calcola BMI e Ottieni Consigli</button>
+            </form>
+
+            <div id="results" class="results">
+                <div class="bmi-display">
+                    <div class="bmi-value" id="bmiValue"></div>
+                    <div class="bmi-category" id="bmiCategory"></div>
+                </div>
+                
+                <div class="advice-section">
+                    <h3>💡 Consigli Personalizzati per la Dieta</h3>
+                    <ul class="advice-list" id="adviceList"></ul>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Importante:</strong> Questi consigli sono puramente informativi. Per un piano alimentare personalizzato e professionale, consulta sempre un nutrizionista o un medico specializzato.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('bmiForm');
+        const resultsDiv = document.getElementById('results');
+        const bmiValueDiv = document.getElementById('bmiValue');
+        const bmiCategoryDiv = document.getElementById('bmiCategory');
+        const adviceList = document.getElementById('adviceList');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateBMI();
+        });
+
+        function calculateBMI() {
+            const age = parseInt(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            const height = parseFloat(document.getElementById('height').value) / 100; // Convert to meters
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            // Get selected habits
+            const selectedHabits = [];
+            const habitCheckboxes = document.querySelectorAll('input[name="habits"]:checked');
+            habitCheckboxes.forEach(checkbox => {
+                selectedHabits.push(checkbox.value);
+            });
+
+            // Calculate BMI
+            const bmi = weight / (height * height);
+            
+            // Display BMI
+            bmiValueDiv.textContent = bmi.toFixed(1);
+            
+            // Determine BMI category and advice
+            let category, categoryClass, advice;
+            
+            if (bmi < 18.5) {
+                category = "Sottopeso";
+                categoryClass = "underweight";
+                advice = getUnderweightAdvice(age, gender, selectedHabits);
+            } else if (bmi >= 18.5 && bmi < 25) {
+                category = "Peso normale";
+                categoryClass = "normal";
+                advice = getNormalWeightAdvice(age, gender, selectedHabits);
+            } else if (bmi >= 25 && bmi < 30) {
+                category = "Sovrappeso";
+                categoryClass = "overweight";
+                advice = getOverweightAdvice(age, gender, selectedHabits);
+            } else {
+                category = "Obesità";
+                categoryClass = "obese";
+                advice = getObesityAdvice(age, gender, selectedHabits);
+            }
+            
+            bmiCategoryDiv.textContent = category;
+            bmiCategoryDiv.className = `bmi-category ${categoryClass}`;
+            
+            // Display advice
+            adviceList.innerHTML = '';
+            advice.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                adviceList.appendChild(li);
+            });
+            
+            // Show results with animation
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function getUnderweightAdvice(age, gender, habits) {
+            let advice = [
+                "Aumenta gradualmente l'apporto calorico con cibi nutrienti e densi di energia",
+                "Consuma proteine ad ogni pasto (carni magre, pesce, legumi, uova, latticini)",
+                "Includi grassi sani come avocado, noci, semi e olio d'oliva",
+                "Mangia piccoli pasti frequenti (5-6 al giorno) invece di 3 grandi",
+                "Bevi frullati proteici o smoothie con frutta e yogurt"
+            ];
+
+            if (habits.includes('irregularMeals')) {
+                advice.push("Stabilisci orari fissi per i pasti per migliorare l'appetito e la digestione");
+            }
+            
+            if (habits.includes('lowWaterIntake')) {
+                advice.push("Bevi acqua ma non durante i pasti per non ridurre l'appetito");
+            }
+
+            if (habits.includes('vegetarian')) {
+                advice.push("Combina legumi e cereali per proteine complete, aggiungi semi e frutta secca");
+            }
+
+            return advice;
+        }
+
+        function getNormalWeightAdvice(age, gender, habits) {
+            let advice = [
+                "Mantieni un'alimentazione equilibrata con tutti i gruppi alimentari",
+                "Consuma 5 porzioni di frutta e verdura al giorno",
+                "Scegli cereali integrali invece di quelli raffinati",
+                "Limita gli zuccheri aggiunti e i cibi ultraprocessati",
+                "Mantieni un'attività fisica regolare"
+            ];
+
+            if (habits.includes('fastFood')) {
+                advice.push("Riduci gradualmente il consumo di fast food, sostituiscilo con pasti casalinghi");
+            }
+            
+            if (habits.includes('sweetDrinks')) {
+                advice.push("Sostituisci le bevande zuccherate con acqua, tè verde o tisane non zuccherate");
+            }
+
+            if (habits.includes('lateNightEating')) {
+                advice.push("Evita di mangiare nelle 3 ore prima di andare a dormire");
+            }
+
+            if (habits.includes('lowWaterIntake')) {
+                advice.push("Bevi almeno 8 bicchieri di acqua al giorno");
+            }
+
+            return advice;
+        }
+
+        function getOverweightAdvice(age, gender, habits) {
+            let advice = [
+                "Crea un deficit calorico moderato (300-500 calorie al giorno)",
+                "Riempi metà piatto con verdure ad ogni pasto principale",
+                "Scegli proteine magre (pollo, pesce, legumi, tofu)",
+                "Limita drasticamente zuccheri e dolci",
+                "Controlla le porzioni usando piatti più piccoli",
+                "Aumenta l'attività fisica gradualmente"
+            ];
+
+            if (habits.includes('fastFood')) {
+                advice.push("Elimina completamente i fast food e sostituiscili con pasti preparati a casa");
+            }
+            
+            if (habits.includes('sweetDrinks')) {
+                advice.push("Elimina tutte le bevande zuccherate, gasate e alcoliche");
+            }
+
+            if (habits.includes('irregularMeals')) {
+                advice.push("Stabilisci 3 pasti principali e 2 spuntini sani a orari fissi");
+            }
+
+            if (habits.includes('lateNightEating')) {
+                advice.push("Non mangiare dopo le 20:00 e bevi una tisana se hai fame serale");
+            }
+
+            return advice;
+        }
+
+        function getObesityAdvice(age, gender, habits) {
+            let advice = [
+                "Consulta un medico o nutrizionista per un piano personalizzato",
+                "Inizia con piccoli cambiamenti sostenibili nel tempo",
+                "Concentrati su verdure, proteine magre e cereali integrali",
+                "Elimina completamente cibi processati e zuccheri aggiunti",
+                "Pratica il controllo delle porzioni pesando gli alimenti",
+                "Inizia con attività fisica leggera come camminare 30 min/giorno"
+            ];
+
+            if (habits.includes('fastFood')) {
+                advice.push("Elimina immediatamente tutti i fast food dalla dieta");
+            }
+            
+            if (habits.includes('sweetDrinks')) {
+                advice.push("Sostituisci tutte le bevande caloriche con acqua naturale");
+            }
+
+            if (habits.includes('irregularMeals')) {
+                advice.push("Pianifica tutti i pasti settimanalmente e prepara il cibo in anticipo");
+            }
+
+            if (habits.includes('lateNightEating')) {
+                advice.push("Smetti di mangiare almeno 4 ore prima di dormire");
+            }
+
+            advice.push("Considera il supporto di un gruppo o di un professionista per la motivazione");
+            
+            return advice;
+        }
+
+        // Add some interactive effects
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

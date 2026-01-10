@@ -1,0 +1,1168 @@
+<?php
+ini_set('session.name', 'LC_IDENTIFIER');
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+header('Location: index.html');
+exit;
+}
+
+$userName = $_SESSION['name'] ?? $_SESSION['email'] ?? 'User';
+$userEmail = $_SESSION['email'] ?? '';
+$userPicture = $_SESSION['profile_picture'] ?? '';
+?>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Planner <?php echo $year; ?> - Task Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+            
+
+           
+
+        .tabs-container {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .nav-tabs {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .nav-tabs .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 0;
+            padding: 15px 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background: white;
+            border: none;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-pane {
+            padding: 30px;
+            background: white;
+        }
+
+        .month-container {
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            margin-bottom: 0;
+        }
+
+        .month-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e9ecef;
+        }
+
+        .day-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .day-cell {
+            background: white;
+            min-height: 120px;
+            padding: 8px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .day-cell:hover {
+            background: #f8f9fa;
+            transform: scale(1.02);
+        }
+
+        .day-cell:hover .add-task-btn {
+            opacity: 1;
+        }
+
+        .add-task-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .add-task-btn:hover {
+            background: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .task-indicator {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; border-radius: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .task-list {
+            margin-top: 5px;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--primary-color);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            margin: 1px 0;
+            display: block;
+            text-decoration: none;
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        .task-item:hover {
+            background: rgba(52, 152, 219, 0.2);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+            
+            .modal-details {
+display: none; /* Nascondi il modal di default */
+position: fixed;
+z-index: 1000; /* Mostra sopra altri elementi */
+left: 40;
+top: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.5);
+backdrop-filter: blur(2px);                    
+}
+.modal-content {
+background-color: #fff;
+margin: 15% auto; /* Centra il modal */
+padding: 20px;
+border: 1px solid #888;
+width: 85%; /* Larghezza del modal */
+}
+.modal-details-content {
+background-color: #fff;
+margin: 5% auto; /* Centra il modal */
+padding: 20px;
+border: 1px solid #888;
+width: 50%; /* Larghezza del modal */
+}            
+            
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        .modal-details-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+                padding: 8px 12px;
+        }  
+            
+        .modal-details-body {
+            padding: .5rem 1rem;
+                font-size: 1rem;
+                margin: .5rem auto;
+                line-height: 1.5;
+            }    
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+            
+            .close-button {
+color: #aaa;
+float: right;
+font-size: 28px;
+font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+color: black;
+text-decoration: none;
+cursor: pointer;
+}
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            border: none;
+            color: white;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, var(--accent-color), #ff6b9d);
+            border: none;
+            color: white;
+        }
+
+        .day-number {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .day-number.other-month {
+            color: #adb5bd;
+        }
+
+        .special-day {
+            background: linear-gradient(135deg, var(--accent-color), #ff6b9d);
+            color: white;
+            border-radius: 8px;
+            padding: 3px 6px;
+            font-size: 0.75rem;
+            margin: 2px 0;
+            display: block;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .special-day:hover {
+            transform: scale(1.05);
+            color: white;
+            text-decoration: none;
+        }
+
+        .special-day.holiday {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+        }
+
+        .special-day.international {
+            background: linear-gradient(135deg, var(--warning-color), #f1c40f);
+            color: #2c3e50;
+        }
+
+        .special-day.awareness {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .today {
+            background: linear-gradient(135deg, #ff6b9d, var(--accent-color));
+            color: white;
+            box-shadow: 0 2px 8px rgba(255,255,255,.6) inset;    
+        }
+
+        .search-container {
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            border-radius: 25px;
+            border: 2px solid var(--secondary-color);
+            padding: 12px 20px;
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+            border-color: var(--secondary-color);
+        }
+
+        .version-info {
+            text-align: center;
+            margin-top: 30px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-grid {
+                font-size: 0.8rem;
+            }
+            
+            .day-cell {
+                min-height: 80px;
+                padding: 4px;
+            }
+            
+            .special-day {
+                font-size: 0.65rem;
+                padding: 2px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <div class="header">
+                <h1><i class="fas fa-calendar-alt"></i> Mega Planner  <?php echo $year; ?> </h1>
+                <p class="lead">Calendario Murale con Giornate Mondiali e Internazionali</p>
+                    <a href="dashboard.html">← Torna alla Dashboard</a>
+            </div>
+
+            <div class="search-container">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control search-input" id="searchInput" placeholder="🔍 Cerca una giornata speciale...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #e74c3c, #ff6b9d);"></div>
+                    <span>Data Odierna / Risultato Ricerca</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #27ae60, #2ecc71);"></div>
+                    <span>Festività</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #f39c12, #f1c40f);"></div>
+                    <span>Giornate Internazionali</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);"></div>
+                    <span>Giornate Mondiali di Sensibilizzazione</span>
+                </div>
+            </div>
+
+            <div class="tabs-container">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs nav-justified" id="monthTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="jan-tab" data-bs-toggle="tab" data-bs-target="#jan" type="button" role="tab">Gen</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="feb-tab" data-bs-toggle="tab" data-bs-target="#feb" type="button" role="tab">Feb</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="mar-tab" data-bs-toggle="tab" data-bs-target="#mar" type="button" role="tab">Mar</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="apr-tab" data-bs-toggle="tab" data-bs-target="#apr" type="button" role="tab">Apr</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="may-tab" data-bs-toggle="tab" data-bs-target="#may" type="button" role="tab">Mag</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="jun-tab" data-bs-toggle="tab" data-bs-target="#jun" type="button" role="tab">Giu</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="jul-tab" data-bs-toggle="tab" data-bs-target="#jul" type="button" role="tab">Lug</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="aug-tab" data-bs-toggle="tab" data-bs-target="#aug" type="button" role="tab">Ago</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="sep-tab" data-bs-toggle="tab" data-bs-target="#sep" type="button" role="tab">Set</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="oct-tab" data-bs-toggle="tab" data-bs-target="#oct" type="button" role="tab">Ott</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="nov-tab" data-bs-toggle="tab" data-bs-target="#nov" type="button" role="tab">Nov</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="dec-tab" data-bs-toggle="tab" data-bs-target="#dec" type="button" role="tab">Dic</button>
+                    </li>
+                </ul>
+
+                <!-- Tab content -->
+                <div class="tab-content" id="monthTabsContent"></div>
+            </div>
+
+            <div class="version-info">
+                <p><strong> Mega Planner v1.0</strong> - 2025 - by <a href="https://www.vivacitydesign.net/index.php" target="_blank">Vivacity Design</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskModalLabel">
+                        <i class="fas fa-tasks"></i> Aggiungi Task
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="taskAlert" class="alert d-none" role="alert"></div>
+                    <form id="taskForm">
+                        <div class="mb-3">
+                            <label for="taskTitle" class="form-label">Titolo del Task</label>
+                            <input type="text" class="form-control" id="taskTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskDescription" class="form-label">Descrizione</label>
+                            <textarea class="form-control" id="taskDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskTime" class="form-label">Ora (opzionale)</label>
+                            <input type="time" class="form-control" id="taskTime">
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskPriority" class="form-label">Priorità</label>
+                            <select class="form-control" id="taskPriority">
+                                <option value="low">Bassa</option>
+                                <option value="medium" selected>Media</option>
+                                <option value="high">Alta</option>
+                            </select>
+                        </div>
+                        <input type="hidden" id="taskDate" value="">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-primary" id="saveTaskBtn">
+                        <i class="fas fa-save"></i> Salva Task
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <div id="detailsModal" class="modal-details">
+                <div class="modal-details-content">
+                	<span class="close-button">×</span>
+                    <div class="modal-details-header">    
+                	<h2 id="modalDate"></h2>
+                	<p id="modalDay"></p>
+                    </div>         
+                	<div class="modal-details-body">        
+                		<div id="holidayInfo"></div>
+                		<div id="taskList"></div>
+                	</div>        
+                </div>
+         </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const year = new Date().getFullYear();    
+        const months = [
+            'GENNAIO', 'FEBBRAIO', 'MARZO', 'APRILE', 'MAGGIO', 'GIUGNO',
+            'LUGLIO', 'AGOSTO', 'SETTEMBRE', 'OTTOBRE', 'NOVEMBRE', 'DICEMBRE'
+        ];
+
+        const days = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
+
+         
+        const specialDays = {
+            '1-6': { text: 'Epifania', type: 'holiday' },
+            '1-27': { text: 'Giorno della memoria', type: 'awareness' },
+            '2-4': { text: 'G.M. contro il cancro', type: 'awareness' },
+            '2-11': { text: 'Safer internet day', type: 'international' },
+            '2-12': { text: 'Darwin day', type: 'international' },
+            '2-13': { text: 'G.M. della radio', type: 'awareness' },
+            '2-14': { text: 'S. Valentino', type: 'holiday' },
+            '2-17': { text: 'G.N. del gatto', type: 'awareness' },
+            '2-20': { text: 'G.M. della giustizia sociale', type: 'awareness' },
+            '2-21': { text: 'G.M. della lingua madre', type: 'international' },
+            '3-8': { text: 'Festa della donna', type: 'holiday' },
+            '3-12': { text: 'G.M. contro la cybercensura', type: 'awareness' },
+            '3-15': { text: 'G.M. dei diritti dei consumatori', type: 'awareness' },
+            '3-17': { text: 'St. Patrick\'s day', type: 'international' },
+            '3-19': { text: 'Festa del papà', type: 'holiday' },
+            '3-20': { text: 'G.I. della felicità', type: 'international' },
+            '3-21': { text: 'G.M. della poesia', type: 'awareness' },
+            '3-22': { text: 'G.M. dell\'acqua', type: 'awareness' },
+            '4-1': { text: 'Pesce d\'Aprile', type: 'international' },
+            '4-2': { text: 'G.M. dell\'autismo', type: 'awareness' },
+            '4-7': { text: 'G.M. della salute', type: 'awareness' },
+            '4-22': { text: 'Giornata della Terra', type: 'awareness' },
+            '4-23': { text: 'G.M. del libro', type: 'awareness' },
+            '4-25': { text: 'Liberazione d\'Italia', type: 'holiday' },
+            '4-28': { text: 'G.I. della sicurezza sul lavoro', type: 'international' },
+            '4-29': { text: 'G.I. della danza', type: 'international' },
+            '4-30': { text: 'G.M. del jazz', type: 'awareness' },
+            '5-1': { text: 'Festa del lavoro', type: 'holiday' },
+            '5-3': { text: 'G.M. per la libertà di stampa', type: 'awareness' },
+            '5-4': { text: 'Star Wars day', type: 'international' },
+            '5-9': { text: 'Festa dell\'Europa', type: 'international' },
+            '5-12': { text: 'Festa della mamma', type: 'holiday' },
+            '5-15': { text: 'G.I. della famiglia', type: 'international' },
+            '5-17': { text: 'G.M. contro l\'omofobia', type: 'awareness' },
+            '5-18': { text: 'G.I. dei musei', type: 'international' },
+            '5-20': { text: 'G.M. delle api', type: 'awareness' },
+            '5-21': { text: 'G.I. del tè', type: 'international' },
+            '5-22': { text: 'G.I. della Biodiversità', type: 'international' },
+            '5-31': { text: 'G.M. lotta al fumo', type: 'awareness' },
+            '6-1': { text: 'G.M. dell\'infermiere', type: 'awareness' },
+            '6-2': { text: 'Festa della Rep. Italiana', type: 'holiday' },
+            '6-5': { text: 'G.M. dell\'ambiente', type: 'awareness' },
+            '6-8': { text: 'G.M. degli oceani', type: 'awareness' },
+            '6-14': { text: 'G.M. dei donatori di sangue', type: 'awareness' },
+            '6-15': { text: 'G.I. del vento', type: 'international' },
+            '6-21': { text: 'G.I. dello yoga', type: 'international' },
+            '7-6': { text: 'G.I. del bacio', type: 'international' },
+            '7-11': { text: 'G.M. della popolazione', type: 'awareness' },
+            '7-18': { text: 'Nelson Mandela Day', type: 'international' },
+            '7-30': { text: 'G.I. dell\'amicizia', type: 'international' },
+            '8-8': { text: 'G.I. del gatto', type: 'international' },
+            '8-12': { text: 'G.I. della gioventù', type: 'international' },
+            '8-13': { text: 'G.I. dei mancini', type: 'international' },
+            '8-15': { text: 'Ferragosto', type: 'holiday' },
+            '8-19': { text: 'G.M. della fotografia', type: 'awareness' },
+            '9-8': { text: 'G.I. dell\'alfabetizzazione', type: 'international' },
+            '9-21': { text: 'G.I. della Pace', type: 'international' },
+            '9-27': { text: 'G.M. del Turismo', type: 'awareness' },
+            '10-1': { text: 'G.I. delle persone anziane', type: 'international' },
+            '10-2': { text: 'Festa dei nonni', type: 'holiday' },
+            '10-4': { text: 'G.M. degli animali', type: 'awareness' },
+            '10-5': { text: 'G.M. degli insegnanti', type: 'awareness' },
+            '10-10': { text: 'G.M. della Salute Mentale', type: 'awareness' },
+            '10-16': { text: 'G.M. dell\'alimentazione', type: 'awareness' },
+            '10-31': { text: 'Halloween', type: 'international' },
+            '11-1': { text: 'Festa di tutti i Santi', type: 'holiday' },
+            '11-13': { text: 'G.M. della gentilezza', type: 'awareness' },
+            '11-17': { text: 'G.I. dello studente', type: 'international' },
+            '11-20': { text: 'G.I. dei diritti dell\'infanzia', type: 'international' },
+            '11-25': { text: 'G.I. contro la violenza sulle donne', type: 'international' },
+            '12-1': { text: 'G.M. contro l\'AIDS', type: 'awareness' },
+            '12-3': { text: 'G.I. delle persone con disabilità', type: 'international' },
+            '12-5': { text: 'G.I. del volontariato', type: 'international' },
+            '12-8': { text: 'Festa dell\'Immacolata', type: 'holiday' },
+            '12-10': { text: 'G.M. dei diritti umani', type: 'awareness' },
+            '12-25': { text: 'Natale', type: 'holiday' },
+            '12-26': { text: 'Santo Stefano', type: 'holiday' },
+            '12-31': { text: 'Ultimo dell\'anno', type: 'holiday' }
+        };
+
+        
+/*        let specialDays = [];
+
+fetch('./data/specialdays.json')
+.then(response => {
+if (!response.ok) {
+throw new Error('Network response was not ok');
+}
+return response.json();
+})
+.then(data => {
+specialDays = data; // Assegna i dati letti all'oggetto specialDays
+console.log(specialDays); // Stampa l'oggetto per verificare che sia stato caricato correttamente
+})
+.catch(error => {
+console.error('There was a problem with the fetch operation:', error);
+}); 
+            */
+
+        function getDaysInMonth(month, year) {
+            return new Date(year, month, 0).getDate();
+        }
+
+        function getFirstDayOfMonth(month, year) {
+            return new Date(year, month - 1, 1).getDay();
+        }
+
+        function isToday(day, month, year) {
+            const today = new Date();
+            return day === today.getDate() && 
+                   month === today.getMonth() + 1 && 
+                   year === today.getFullYear();
+        }
+
+        const monthShortNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        let allTasks = {};
+
+        function createCalendar() {
+            const container = document.getElementById('monthTabsContent');
+            
+            if (!container) {
+                console.error('Container monthTabsContent not found');
+                return;
+            }
+            
+            //const year = 2025;
+                
+
+            for (let month = 1; month <= 12; month++) {
+                // Create tab pane
+                const tabPane = document.createElement('div');
+                tabPane.className = `tab-pane fade ${month === 1 ? 'show active' : ''}`;
+                tabPane.id = monthShortNames[month - 1];
+                tabPane.role = 'tabpanel';
+
+                const monthContainer = document.createElement('div');
+                monthContainer.className = 'month-container';
+
+                const monthHeader = document.createElement('div');
+                monthHeader.className = 'month-header';
+                monthHeader.textContent = months[month - 1];
+
+                const calendarGrid = document.createElement('div');
+                calendarGrid.className = 'calendar-grid';
+
+                // Add day headers
+                days.forEach(day => {
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'day-header';
+                    dayHeader.textContent = day;
+                    calendarGrid.appendChild(dayHeader);
+                });
+
+                const daysInMonth = getDaysInMonth(month, year);
+                const firstDay = getFirstDayOfMonth(month, year);
+                const daysInPrevMonth = getDaysInMonth(month - 1, year);
+
+                // Add empty cells for previous month
+                for (let i = 0; i < firstDay; i++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell';
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'day-number other-month';
+                    dayNumber.textContent = daysInPrevMonth - firstDay + i + 1;
+                    dayCell.appendChild(dayNumber);
+                    calendarGrid.appendChild(dayCell);
+                }
+
+                // Add days of the month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell';
+                    dayCell.dataset.date = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                    
+                    if (isToday(day, month, year)) {
+                        dayCell.classList.add('today');
+                    }
+
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'day-number';
+                    dayNumber.textContent = day;
+                    dayCell.appendChild(dayNumber);
+
+                    // Add task button
+                    const addTaskBtn = document.createElement('button');
+                    addTaskBtn.className = 'add-task-btn';
+                    addTaskBtn.innerHTML = '<i class="fas fa-plus"></i>';
+                    addTaskBtn.title = 'Aggiungi task';
+                    addTaskBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        openTaskModal(dayCell.dataset.date);
+                    };
+                    dayCell.appendChild(addTaskBtn);
+
+                    // Check for special days
+                    // Controlla per le festività
+                        const dateKey = `${month}-${day}`; // senza ulteriori padding
+                        if (specialDays[dateKey]) {
+                        const specialDay = document.createElement('div');
+                        specialDay.className = `special-day ${specialDays[dateKey].type}`;
+                        specialDay.textContent = specialDays[dateKey].text;
+                        specialDay.title = specialDays[dateKey].text;
+                        dayCell.appendChild(specialDay);
+                        }
+
+                    // Task list container
+                    const taskList = document.createElement('div');
+                    taskList.className = 'task-list';
+                    taskList.id = `tasks-${dayCell.dataset.date}`;
+                    dayCell.appendChild(taskList);
+
+                    calendarGrid.appendChild(dayCell);
+                        //delete the following {} if you want to remove cel click popup
+                        dayCell.onclick = () => {
+						showDetailsModal(dayCell.dataset.date, month, day);
+						};
+                }
+
+                // Fill remaining cells
+                const totalCells = calendarGrid.children.length;
+                const remainingCells = 42 - (totalCells - 7); // 42 total cells minus 7 headers
+                
+                for (let i = 1; i <= remainingCells; i++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell';
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'day-number other-month';
+                    dayNumber.textContent = i;
+                    dayCell.appendChild(dayNumber);
+                    calendarGrid.appendChild(dayCell);
+                }
+
+                monthContainer.appendChild(monthHeader);
+                monthContainer.appendChild(calendarGrid);
+                tabPane.appendChild(monthContainer);
+                container.appendChild(tabPane);
+            }
+
+            // Set active tab to current month
+            setTimeout(() => {
+                setCurrentMonthTab();
+                loadAllTasks();
+            }, 100);
+        }
+
+        function loadAllTasks() {
+            fetch('tasks.php?action=load')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        allTasks = data.tasks || {};
+                        updateTaskDisplay();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading tasks:', error);
+                });
+        }
+
+        function updateTaskDisplay() {
+            // Clear all existing task indicators
+            document.querySelectorAll('.task-indicator').forEach(el => el.remove());
+            document.querySelectorAll('.task-list').forEach(el => el.innerHTML = '');
+
+            // Add tasks to calendar
+            Object.keys(allTasks).forEach(date => {
+                const dayCell = document.querySelector(`[data-date="${date}"]`);
+                if (dayCell && allTasks[date].length > 0) {
+                    // Add task indicator
+                    const indicator = document.createElement('div');
+                    indicator.className = 'task-indicator';
+                    dayCell.appendChild(indicator);
+
+                    // Add tasks to task list
+                    const taskList = dayCell.querySelector('.task-list');
+                    allTasks[date].forEach(task => {
+                        const taskItem = document.createElement('div');
+                        taskItem.className = 'task-item';
+                        taskItem.textContent = task.time ? `${task.time} - ${task.title}` : task.title;
+                        taskItem.title = task.description || task.title;
+                        taskList.appendChild(taskItem);
+                    });
+                }
+            });
+        }
+            
+         //For single cell task modal + emotions + bioritmi  
+        let tasks = {};
+
+fetch('./data/tasks.json', { cache: 'no-store' })
+.then(response => {
+if (!response.ok) {
+throw new Error('Network response was not ok');
+}
+return response.json();
+})
+.then(data => {
+tasks = data; // Carica i dati dei task
+})
+.catch(error => {
+console.error('There was a problem with the fetch operation:', error);
+}); 
+            
+let emotions = [];
+let biorhythms = [];
+
+fetch('./data/emotions_data.json', { cache: 'no-store' })
+.then(response => {
+if (!response.ok) {
+throw new Error('Network response was not ok');
+}
+return response.json();
+})
+.then(data => {
+emotions = data; // Carica i dati delle emozioni
+})
+.catch(error => {
+console.error('There was a problem with the fetch operation:', error);
+});
+
+fetch('./data/biorhythms_data.json', { cache: 'no-store' })
+.then(response => {
+if (!response.ok) {
+throw new Error('Network response was not ok');
+}
+return response.json();
+})
+.then(data => {
+biorhythms = data; // Carica i dati dei bioritmi
+})
+.catch(error => {
+console.error('There was a problem with the fetch operation:', error);
+});
+            
+            
+            
+            
+function showDetailsModal(date, month, day) {
+const modal = document.getElementById('detailsModal');
+const modalDate = document.getElementById('modalDate');
+const modalDay = document.getElementById('modalDay');
+const holidayInfo = document.getElementById('holidayInfo');
+const taskList = document.getElementById('taskList');
+
+// Imposta la data e il giorno
+modalDate.textContent = date;
+modalDay.textContent = new Date(year, month - 1, day).toLocaleString('it-IT', { weekday: 'long' });
+
+// Controlla per festività
+const dateKey = `${month}-${day}`;
+holidayInfo.innerHTML = '';
+
+if (specialDays[dateKey]) {
+holidayInfo.innerHTML = `<strong>${specialDays[dateKey].text}</strong> (${specialDays[dateKey].type})`;
+} else {
+holidayInfo.innerHTML = 'Nessuna festività.';
+}
+
+// Controlla i task associati
+taskList.innerHTML = ''; // Resetta il contenuto
+if (tasks[date]) {
+tasks[date].forEach(task => {
+const taskItem = document.createElement('div');
+taskItem.innerHTML = `<strong>${task.title}</strong>: ${task.description} (Ore: ${task.time}, Priorità: ${task.priority})`;
+taskList.appendChild(taskItem);
+});
+} else {
+taskList.innerHTML = 'Nessun task associato.';
+}
+
+// Aggiungi il contenuto delle emozioni
+const emotionList = document.createElement('div');
+emotionList.innerHTML = '<h3>Emozioni:</h3>';
+emotions.forEach(emotion => {
+if (emotion.date === date) {
+const emotionItem = document.createElement('div');
+emotionItem.innerHTML = `<strong>${emotion.emotion}</strong>: ${emotion.note}`;
+emotionList.appendChild(emotionItem);
+}
+});
+
+// Se non ci sono emozioni, informare l'utente
+if (emotionList.children.length === 1) {
+emotionList.innerHTML += '<p>Nessuna emozione registrata per questo giorno.</p>';
+}
+
+// Aggiungi il contenuto dei bioritmi
+const biorhythmList = document.createElement('div');
+biorhythmList.innerHTML = '<h3>Bioritmi:</h3>';
+biorhythms.forEach(biorhythm => {
+if (biorhythm.dataCalcolo === date) {
+const biorhythmItem = document.createElement('div');
+biorhythmItem.innerHTML = `
+<strong>Fisico:</strong> ${biorhythm.bioritmi.fisico} <br>
+<strong>Emotivo:</strong> ${biorhythm.bioritmi.emotivo} <br>
+<strong>Intellettuale:</strong> ${biorhythm.bioritmi.intellettuale}
+`;
+biorhythmList.appendChild(biorhythmItem);
+}
+});
+
+// Se non ci sono bioritmi, informare l'utente
+if (biorhythmList.children.length === 1) {
+biorhythmList.innerHTML += '<p>Nessun bioritmo registrato per questo giorno.</p>';
+}
+
+// Aggiungi le emozioni e i bioritmi al modal
+/*const modalBody = document.querySelector('.modal-details-body');
+
+modalBody.appendChild(emotionList);
+modalBody.appendChild(biorhythmList); */
+
+// Aggiungi le emozioni e i bioritmi al modale solo se sono assenti        
+const modalBody = document.querySelector('.modal-details-body');
+
+// Rimuovi tutti i div che contengono emozioni e bioritmi
+const emotionSections = modalBody.querySelectorAll('div:has(h3)');
+emotionSections.forEach(section => {
+    if (section.innerHTML.includes('Emozioni:') || section.innerHTML.includes('Bioritmi:')) {
+        section.remove();
+    }
+});
+
+modalBody.appendChild(emotionList);
+modalBody.appendChild(biorhythmList);        
+
+// Mostra il modal
+modal.style.display = 'block';
+
+// Chiudi il modal quando si clicca sulla X
+document.querySelector('.close-button').onclick = () => {
+modal.style.display = 'none';
+};
+
+// Chiudi il modal quando si clicca fuori dal contenuto
+window.onclick = (event) => {
+if (event.target === modal) {
+modal.style.display = 'none';
+}
+};
+}
+
+            
+       //to add tasks     
+
+        function openTaskModal(date) {
+            document.getElementById('taskDate').value = date;
+            document.getElementById('taskModalLabel').innerHTML = `<i class="fas fa-tasks"></i> Aggiungi Task - ${formatDate(date)}`;
+            
+            // Reset form
+            document.getElementById('taskForm').reset();
+            document.getElementById('taskAlert').classList.add('d-none');
+            
+            const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+            modal.show();
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('it-IT', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        function saveTask() {
+            const taskData = {
+                date: document.getElementById('taskDate').value,
+                title: document.getElementById('taskTitle').value,
+                description: document.getElementById('taskDescription').value,
+                time: document.getElementById('taskTime').value,
+                priority: document.getElementById('taskPriority').value
+            };
+
+            if (!taskData.title.trim()) {
+                showAlert('Il titolo del task è obbligatorio!', 'danger');
+                return;
+            }
+
+            fetch('tasks.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                    cache: 'no-store',
+                body: JSON.stringify({
+                    action: 'save',
+                    task: taskData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('Task salvato con successo!', 'success');
+                    
+                    // Update local tasks
+                    if (!allTasks[taskData.date]) {
+                        allTasks[taskData.date] = [];
+                    }
+                    allTasks[taskData.date].push(taskData);
+                    
+                    updateTaskDisplay();
+                    
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Errore nel salvare il task!', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Errore di connessione!', 'danger');
+            });
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('taskAlert');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.classList.remove('d-none');
+        }
+
+        function setCurrentMonthTab() {
+            const currentMonth = new Date().getMonth();
+            const currentTab = document.getElementById(`${monthShortNames[currentMonth]}-tab`);
+            const currentPane = document.getElementById(monthShortNames[currentMonth]);
+            
+            if (currentTab && currentPane) {
+                // Remove active class from first tab
+                document.querySelector('.nav-link.active').classList.remove('active');
+                document.querySelector('.tab-pane.active').classList.remove('active', 'show');
+                
+                // Set current month as active
+                currentTab.classList.add('active');
+                currentPane.classList.add('active', 'show');
+            }
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                // Reset all highlights first
+                document.querySelectorAll('.special-day').forEach(element => {
+                    element.style.background = '';
+                    element.style.transform = '';
+                });
+                
+                if (searchTerm !== '') {
+                    const specialDayElements = document.querySelectorAll('.special-day');
+                    let foundInMonth = null;
+                    
+                    specialDayElements.forEach(element => {
+                        if (element.textContent.toLowerCase().includes(searchTerm)) {
+                            element.style.background = 'linear-gradient(135deg, #ff6b9d, #ff4757)';
+                            element.style.transform = 'scale(1.1)';
+                            
+                            // Find which month this element is in
+                            if (!foundInMonth) {
+                                const tabPane = element.closest('.tab-pane');
+                                if (tabPane) {
+                                    foundInMonth = tabPane.id;
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Switch to the first month that contains a match
+                    if (foundInMonth) {
+                        const targetTab = document.getElementById(`${foundInMonth}-tab`);
+                        if (targetTab) {
+                            const tab = new bootstrap.Tab(targetTab);
+                            tab.show();
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize calendar
+        document.addEventListener('DOMContentLoaded', function() {
+            createCalendar();
+            setupSearch();
+            
+            // Setup task save button
+            document.getElementById('saveTaskBtn').addEventListener('click', saveTask);
+            
+            // Setup form submission
+            document.getElementById('taskForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveTask();
+            });
+        });
+    </script>
+</body>
+</html>

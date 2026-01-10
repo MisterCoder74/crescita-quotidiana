@@ -1,0 +1,138 @@
+{
+  "physical": [
+    {
+      "url": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop",
+      "description": "Person running at sunrise"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=250&fit=crop",
+      "description": "Yoga pose in nature"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=400&h=250&fit=crop",
+      "description": "Gym workout equipment"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1506629905607-d3e42536bcbc?w=400&h=250&fit=crop",
+      "description": "Mountain hiking trail"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=400&h=250&fit=crop",
+      "description": "Healthy lifestyle concept"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=250&fit=crop",
+      "description": "Active fitness training"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1583500178690-be820c4db5ed?w=400&h=250&fit=crop",
+      "description": "Strength training equipment"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=250&fit=crop",
+      "description": "Athletic performance"
+    }
+  ],
+  "emotional": [
+    {
+      "url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=250&fit=crop",
+      "description": "Peaceful sunset over water"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=250&fit=crop",
+      "description": "Serene forest path"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=250&fit=crop",
+      "description": "Calm ocean waves"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=250&fit=crop",
+      "description": "Peaceful mountain lake"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=250&fit=crop",
+      "description": "Heart-shaped hands at sunset"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=400&h=250&fit=crop",
+      "description": "Meditation and mindfulness"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=400&h=250&fit=crop",
+      "description": "Emotional balance and harmony"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&h=250&fit=crop",
+      "description": "Inner peace and tranquility"
+    }
+  ],
+  "intellectual": [
+    {
+      "url": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=250&fit=crop",
+      "description": "Stack of books and reading"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=250&fit=crop",
+      "description": "Light bulb representing ideas"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=250&fit=crop",
+      "description": "Workspace with laptop and notes"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=250&fit=crop",
+      "description": "Technology and innovation"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=250&fit=crop",
+      "description": "Chess pieces strategy"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&h=250&fit=crop",
+      "description": "Creative thinking and brainstorming"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=250&fit=crop",
+      "description": "Learning and education"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=250&fit=crop",
+      "description": "Mental clarity and focus"
+    }
+  ],
+  "general": [
+    {
+      "url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=250&fit=crop",
+      "description": "Beautiful sunrise inspiration"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=250&fit=crop",
+      "description": "Nature pathway forward"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=250&fit=crop",
+      "description": "Cosmic starry sky"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=250&fit=crop",
+      "description": "Motivational landscape"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=250&fit=crop",
+      "description": "Peaceful natural scene"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1476820865390-c52aeebb9891?w=400&h=250&fit=crop",
+      "description": "Success and achievement"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=250&fit=crop",
+      "description": "Life journey and progress"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=400&h=250&fit=crop",
+      "description": "Personal growth and development"
+    }
+  ]
+}

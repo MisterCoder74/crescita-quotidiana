@@ -1,0 +1,314 @@
+{
+   "1-6":{
+      "text":"Epifania",
+      "type":"holiday"
+   },
+   "1-27":{
+      "text":"Giorno della memoria",
+      "type":"awareness"
+   },
+   "2-4":{
+      "text":"G.M. contro il cancro",
+      "type":"awareness"
+   },
+   "2-11":{
+      "text":"Safer internet day",
+      "type":"international"
+   },
+   "2-12":{
+      "text":"Darwin day",
+      "type":"international"
+   },
+   "2-13":{
+      "text":"G.M. della radio",
+      "type":"awareness"
+   },
+   "2-14":{
+      "text":"S. Valentino",
+      "type":"holiday"
+   },
+   "2-17":{
+      "text":"G.N. del gatto",
+      "type":"awareness"
+   },
+   "2-20":{
+      "text":"G.M. della giustizia sociale",
+      "type":"awareness"
+   },
+   "2-21":{
+      "text":"G.M. della lingua madre",
+      "type":"international"
+   },
+   "3-8":{
+      "text":"Festa della donna",
+      "type":"holiday"
+   },
+   "3-12":{
+      "text":"G.M. contro la cybercensura",
+      "type":"awareness"
+   },
+   "3-15":{
+      "text":"G.M. dei diritti dei consumatori",
+      "type":"awareness"
+   },
+   "3-17":{
+      "text":"St. Patrick's day",
+      "type":"international"
+   },
+   "3-19":{
+      "text":"Festa del papà",
+      "type":"holiday"
+   },
+   "3-20":{
+      "text":"G.I. della felicità",
+      "type":"international"
+   },
+   "3-21":{
+      "text":"G.M. della poesia",
+      "type":"awareness"
+   },
+   "3-22":{
+      "text":"G.M. dell'acqua",
+      "type":"awareness"
+   },
+   "4-1":{
+      "text":"Pesce d'Aprile",
+      "type":"international"
+   },
+   "4-2":{
+      "text":"G.M. dell'autismo",
+      "type":"awareness"
+   },
+   "4-7":{
+      "text":"G.M. della salute",
+      "type":"awareness"
+   },
+   "4-22":{
+      "text":"Giornata della Terra",
+      "type":"awareness"
+   },
+   "4-23":{
+      "text":"G.M. del libro",
+      "type":"awareness"
+   },
+   "4-25":{
+      "text":"Liberazione d'Italia",
+      "type":"holiday"
+   },
+   "4-28":{
+      "text":"G.I. della sicurezza sul lavoro",
+      "type":"international"
+   },
+   "4-29":{
+      "text":"G.I. della danza",
+      "type":"international"
+   },
+   "4-30":{
+      "text":"G.M. del jazz",
+      "type":"awareness"
+   },
+   "5-1":{
+      "text":"Festa del lavoro",
+      "type":"holiday"
+   },
+   "5-3":{
+      "text":"G.M. per la libertà di stampa",
+      "type":"awareness"
+   },
+   "5-4":{
+      "text":"Star Wars day",
+      "type":"international"
+   },
+   "5-9":{
+      "text":"Festa dell'Europa",
+      "type":"international"
+   },
+   "5-12":{
+      "text":"Festa della mamma",
+      "type":"holiday"
+   },
+   "5-15":{
+      "text":"G.I. della famiglia",
+      "type":"international"
+   },
+   "5-17":{
+      "text":"G.M. contro l'omofobia",
+      "type":"awareness"
+   },
+   "5-18":{
+      "text":"G.I. dei musei",
+      "type":"international"
+   },
+   "5-20":{
+      "text":"G.M. delle api",
+      "type":"awareness"
+   },
+   "5-21":{
+      "text":"G.I. del tè",
+      "type":"international"
+   },
+   "5-22":{
+      "text":"G.I. della Biodiversità",
+      "type":"international"
+   },
+   "5-31":{
+      "text":"G.M. lotta al fumo",
+      "type":"awareness"
+   },
+   "6-1":{
+      "text":"G.M. dell'infermiere",
+      "type":"awareness"
+   },
+   "6-2":{
+      "text":"Festa della Rep. Italiana",
+      "type":"holiday"
+   },
+   "6-5":{
+      "text":"G.M. dell'ambiente",
+      "type":"awareness"
+   },
+   "6-8":{
+      "text":"G.M. degli oceani",
+      "type":"awareness"
+   },
+   "6-14":{
+      "text":"G.M. dei donatori di sangue",
+      "type":"awareness"
+   },
+   "6-15":{
+      "text":"G.I. del vento",
+      "type":"international"
+   },
+   "6-21":{
+      "text":"G.I. dello yoga",
+      "type":"international"
+   },
+   "7-6":{
+      "text":"G.I. del bacio",
+      "type":"international"
+   },
+   "7-11":{
+      "text":"G.M. della popolazione",
+      "type":"awareness"
+   },
+   "7-18":{
+      "text":"Nelson Mandela Day",
+      "type":"international"
+   },
+   "7-30":{
+      "text":"G.I. dell'amicizia",
+      "type":"international"
+   },
+   "8-8":{
+      "text":"G.I. del gatto",
+      "type":"international"
+   },
+   "8-12":{
+      "text":"G.I. della gioventù",
+      "type":"international"
+   },
+   "8-13":{
+      "text":"G.I. dei mancini",
+      "type":"international"
+   },
+   "8-15":{
+      "text":"Ferragosto",
+      "type":"holiday"
+   },
+   "8-19":{
+      "text":"G.M. della fotografia",
+      "type":"awareness"
+   },
+   "9-8":{
+      "text":"G.I. dell'alfabetizzazione",
+      "type":"international"
+   },
+   "9-21":{
+      "text":"G.I. della Pace",
+      "type":"international"
+   },
+   "9-27":{
+      "text":"G.M. del Turismo",
+      "type":"awareness"
+   },
+   "10-1":{
+      "text":"G.I. delle persone anziane",
+      "type":"international"
+   },
+   "10-2":{
+      "text":"Festa dei nonni",
+      "type":"holiday"
+   },
+   "10-4":{
+      "text":"G.M. degli animali",
+      "type":"awareness"
+   },
+   "10-5":{
+      "text":"G.M. degli insegnanti",
+      "type":"awareness"
+   },
+   "10-10":{
+      "text":"G.M. della Salute Mentale",
+      "type":"awareness"
+   },
+   "10-16":{
+      "text":"G.M. dell'alimentazione",
+      "type":"awareness"
+   },
+   "10-31":{
+      "text":"Halloween",
+      "type":"international"
+   },
+   "11-1":{
+      "text":"Festa di tutti i Santi",
+      "type":"holiday"
+   },
+   "11-13":{
+      "text":"G.M. della gentilezza",
+      "type":"awareness"
+   },
+   "11-17":{
+      "text":"G.I. dello studente",
+      "type":"international"
+   },
+   "11-20":{
+      "text":"G.I. dei diritti dell'infanzia",
+      "type":"international"
+   },
+   "11-25":{
+      "text":"G.I. contro la violenza sulle donne",
+      "type":"international"
+   },
+   "12-1":{
+      "text":"G.M. contro l'AIDS",
+      "type":"awareness"
+   },
+   "12-3":{
+      "text":"G.I. delle persone con disabilità",
+      "type":"international"
+   },
+   "12-5":{
+      "text":"G.I. del volontariato",
+      "type":"international"
+   },
+   "12-8":{
+      "text":"Festa dell'Immacolata",
+      "type":"holiday"
+   },
+   "12-10":{
+      "text":"G.M. dei diritti umani",
+      "type":"awareness"
+   },
+   "12-25":{
+      "text":"Natale",
+      "type":"holiday"
+   },
+   "12-26":{
+      "text":"Santo Stefano",
+      "type":"holiday"
+   },
+   "12-31":{
+      "text":"Ultimo dell'anno",
+      "type":"holiday"
+   }
+}

@@ -477,15 +477,20 @@ form.reset();
 });
         
 function loadEmotions() {
-fetch('./data/emotions_data.json', { cache: 'no-store' })
+fetch('./php/get_emotions.php', { cache: 'no-store' })
 .then(response => response.json())
 .then(data => {
-allEmotionsData = data; // Store all data
-displayEmotions(data);
+if (data.success) {
+allEmotionsData = data.emotions || []; // Store all data
+displayEmotions(allEmotionsData);
+} else {
+console.error('Error loading emotions:', data.error || 'Unknown error');
+emotionList.innerHTML = '<div class="empty-state">Errore nel caricamento delle emozioni.</div>';
+}
 })
 .catch(error => {
 console.error('Error loading emotions:', error);
-emotionList.innerHTML = '<div class="empty-state">Errore nel caricamento delle emozioni. Verifica che il file emotions_data.json sia presente nella sotto-cartella <i>./data</i></div>';
+emotionList.innerHTML = '<div class="empty-state">Errore nel caricamento delle emozioni.</div>';
 });
 }        
 

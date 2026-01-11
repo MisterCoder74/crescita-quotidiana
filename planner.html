@@ -542,15 +542,15 @@ cursor: pointer;
         
         <div id="detailsModal" class="modal-details">
                 <div class="modal-details-content">
-                	<span class="close-button">×</span>
+                    <span class="close-button">×</span>
                     <div class="modal-details-header">    
-                	<h2 id="modalDate"></h2>
-                	<p id="modalDay"></p>
+                    <h2 id="modalDate"></h2>
+                    <p id="modalDay"></p>
                     </div>         
-                	<div class="modal-details-body">        
-                		<div id="holidayInfo"></div>
-                		<div id="taskList"></div>
-                	</div>        
+                    <div class="modal-details-body">        
+                        <div id="holidayInfo"></div>
+                        <div id="taskList"></div>
+                    </div>        
                 </div>
          </div>
 
@@ -780,8 +780,8 @@ console.error('There was a problem with the fetch operation:', error);
                     calendarGrid.appendChild(dayCell);
                         //delete the following {} if you want to remove cel click popup
                         dayCell.onclick = () => {
-						showDetailsModal(dayCell.dataset.date, month, day);
-						};
+                        showDetailsModal(dayCell.dataset.date, month, day);
+                        };
                 }
 
                 // Fill remaining cells
@@ -812,7 +812,7 @@ console.error('There was a problem with the fetch operation:', error);
         }
 
         function loadAllTasks() {
-            fetch('tasks.php?action=load')
+            fetch('tasks.php?action=load', { cache: 'no-store' })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -852,10 +852,12 @@ console.error('There was a problem with the fetch operation:', error);
             });
         }
             
-         //For single cell task modal + emotions + bioritmi  
-        let tasks = {};
+         //For single cell task modal + emotions + bioritmi
+        let allTasks = {};
+        let emotions = [];
+        let biorhythms = [];
 
-fetch('./data/tasks.json', { cache: 'no-store' })
+fetch('./php/get_emotions.php', { cache: 'no-store' })
 .then(response => {
 if (!response.ok) {
 throw new Error('Network response was not ok');
@@ -863,30 +865,17 @@ throw new Error('Network response was not ok');
 return response.json();
 })
 .then(data => {
-tasks = data; // Carica i dati dei task
-})
-.catch(error => {
-console.error('There was a problem with the fetch operation:', error);
-}); 
-            
-let emotions = [];
-let biorhythms = [];
-
-fetch('./data/emotions_data.json', { cache: 'no-store' })
-.then(response => {
-if (!response.ok) {
-throw new Error('Network response was not ok');
+if (data.success) {
+emotions = data.emotions || []; // Carica i dati delle emozioni
+} else {
+console.error('Error loading emotions:', data.error || 'Unknown error');
 }
-return response.json();
-})
-.then(data => {
-emotions = data; // Carica i dati delle emozioni
 })
 .catch(error => {
 console.error('There was a problem with the fetch operation:', error);
 });
 
-fetch('./data/biorhythms_data.json', { cache: 'no-store' })
+fetch('./php/get_biorhythms.php', { cache: 'no-store' })
 .then(response => {
 if (!response.ok) {
 throw new Error('Network response was not ok');
@@ -894,7 +883,11 @@ throw new Error('Network response was not ok');
 return response.json();
 })
 .then(data => {
-biorhythms = data; // Carica i dati dei bioritmi
+if (data.success) {
+biorhythms = data.biorhythms || []; // Carica i dati dei bioritmi
+} else {
+console.error('Error loading biorhythms:', data.error || 'Unknown error');
+}
 })
 .catch(error => {
 console.error('There was a problem with the fetch operation:', error);
@@ -926,8 +919,8 @@ holidayInfo.innerHTML = 'Nessuna festività.';
 
 // Controlla i task associati
 taskList.innerHTML = ''; // Resetta il contenuto
-if (tasks[date]) {
-tasks[date].forEach(task => {
+if (allTasks[date]) {
+allTasks[date].forEach(task => {
 const taskItem = document.createElement('div');
 taskItem.innerHTML = `<strong>${task.title}</strong>: ${task.description} (Ore: ${task.time}, Priorità: ${task.priority})`;
 taskList.appendChild(taskItem);
@@ -1062,15 +1055,10 @@ modal.style.display = 'none';
             .then(data => {
                 if (data.success) {
                     showAlert('Task salvato con successo!', 'success');
-                    
-                    // Update local tasks
-                    if (!allTasks[taskData.date]) {
-                        allTasks[taskData.date] = [];
-                    }
-                    allTasks[taskData.date].push(taskData);
-                    
-                    updateTaskDisplay();
-                    
+
+                    // Reload tasks from server to ensure consistency
+                    loadAllTasks();
+
                     setTimeout(() => {
                         bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
                     }, 1500);

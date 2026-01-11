@@ -10,7 +10,7 @@ exit;
 $username = $_SESSION['name'] ?? $_SESSION['email'] ?? 'User';
 $userEmail = $_SESSION['email'] ?? '';
 $userPicture = $_SESSION['profile_picture'] ?? '';
-$birthdate = $_SESSION['data_nascita'];
+$birthdate = $_SESSION['data_nascita'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -251,7 +251,7 @@ min-width:300px;
                 <h2>Benvenuto, <?php echo htmlspecialchars($username); ?></h2>
                 <button id="editProfileBtn" class="home-link">Modifica Profilo</button>
                 <a class="home-link" href="./logout.php">Disconnetti &#8594;</a>
-			
+            
         </header>
 
         <!-- Tools Grid -->

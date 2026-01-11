@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/config.php';
 session_start();
 
 header('Content-Type: application/json');
@@ -12,8 +13,6 @@ http_response_code(403);
 echo json_encode(['success' => false, 'error' => 'Not authorized']);
 exit;
 }
-
-require_once __DIR__ . '/config.php';
 
 class BiorhythmCalculator {
 private $physicalCycle = 23;
@@ -104,17 +103,18 @@ exit;
 }
 
 try {
-$calculator = new BiorhythmCalculator();
-$biorhythms = $calculator->calculate($input['birthdate']);
-$dominantCycle = $calculator->getDominantCycle($biorhythms);
+    $calculator = new BiorhythmCalculator();
+    $biorhythms = $calculator->calculate($input['birthdate']);
+    $dominantCycle = $calculator->getDominantCycle($biorhythms);
 
-// Logging dati utente
-$userDir = DATA_DIR . '/users/' . $_SESSION['user_id'];
-if (!is_dir($userDir)) {
-mkdir($userDir, 0755, true);
-}
+    // ✅ User data folder convention: /data/users/{user_id}/
+    // All user-specific data must be stored using $_SESSION['user_id']
+    $userDir = DATA_DIR . '/users/' . $_SESSION['user_id'];
+    if (!is_dir($userDir)) {
+        mkdir($userDir, 0755, true);
+    }
 
-$logFile = $userDir . '/biorhythm_log.json';
+    $logFile = $userDir . '/biorhythm_log.json';
 
 $logs = [];
 if (file_exists($logFile)) {

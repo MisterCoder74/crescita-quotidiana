@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/config.php';
 session_start();
 
 // ✅ Controllo autenticazione
@@ -18,9 +19,8 @@ echo json_encode(['error' => 'Invalid input data']);
 exit;
 }
 
-require_once __DIR__ . '/config.php';
-
-// ✅ Percorso cartella utente
+// ✅ User data folder convention: /data/users/{user_id}/
+// All user-specific data must be stored using $_SESSION['user_id']
 $userDir = DATA_DIR . '/users/' . $_SESSION['user_id'];
 
 // ✅ Crea la cartella utente se non esiste
@@ -28,8 +28,8 @@ if (!is_dir($userDir)) {
 mkdir($userDir, 0755, true);
 }
 
-// ✅ Nome del file JSON (puoi cambiare il nome in base al contesto)
-$jsonFile = $userDir . '/custom_data.json';
+// ✅ Nome del file JSON per le emozioni
+$jsonFile = $userDir . '/emotions.json';
 
 // ✅ Leggi dati esistenti
 if (file_exists($jsonFile)) {

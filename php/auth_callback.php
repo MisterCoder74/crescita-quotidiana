@@ -133,13 +133,15 @@ break;
 file_put_contents($usersFile, json_encode(['users' => $users], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
 // === Gestione directory utente ===
-$rootUsersDir = ROOT_DIR . '/users';
+// IMPORTANT: User folder convention - always use internal user ID ($_SESSION['user_id'])
+// This ensures consistency across all endpoints (tasks, emotions, biorhythms, etc.)
+$rootUsersDir = DATA_DIR . '/users';
 if (!is_dir($rootUsersDir)) {
-mkdir($rootUsersDir, 0755, true);
+    mkdir($rootUsersDir, 0755, true);
 }
 
-// nome cartella utente: puoi usare google_id o id interno
-$userFolderName = $user['google_id']; // oppure $user['id']
+// Use internal user ID (not google_id) for folder name to maintain consistency
+$userFolderName = $user['id'];
 $userFolderPath = $rootUsersDir . '/' . $userFolderName;
 
 if (!is_dir($userFolderPath)) {

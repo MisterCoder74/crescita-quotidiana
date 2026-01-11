@@ -10,7 +10,7 @@ exit;
 $username = $_SESSION['name'] ?? $_SESSION['email'] ?? 'User';
 $userEmail = $_SESSION['email'] ?? '';
 $userPicture = $_SESSION['profile_picture'] ?? '';
-$birthdate = $_SESSION['data_nascita'];
+$birthdate = $_SESSION['data_nascita'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="en">

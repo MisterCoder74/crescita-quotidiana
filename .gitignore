@@ -1,0 +1,15 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Runtime user-generated data
+/data/users/
+
+# Logs
+*.log
+error_log
+
+# Secrets / local overrides
+.env
+.env.*

@@ -1,69 +1,95 @@
 <?php
+require_once __DIR__ . '/config.php';
+session_start();
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
+
+// ✅ Controllo autenticazione
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Not authorized']);
+    exit;
+}
+
 class InspirationManager {
-    private $quotesFile = 'data/quotes.json';
-    private $imagesFile = 'data/images.json';
-    
-    public function getInspiration($cycle) {
+    private string $quotesFile;
+    private string $imagesFile;
+
+    public function __construct() {
+        // Reference data lives in shared /data (not user-specific)
+        $this->quotesFile = DATA_DIR . '/quotes.json';
+        $this->imagesFile = DATA_DIR . '/images.json';
+    }
+
+    public function getInspiration(string $cycle): array {
         $quote = $this->getQuoteForCycle($cycle);
         $image = $this->getImageForCycle($cycle);
-        
+
         return [
             'quote' => $quote,
             'image' => $image,
             'cycle' => $cycle
         ];
     }
-    
-    private function getQuoteForCycle($cycle) {
+
+    private function getQuoteForCycle(string $cycle): array {
         $quotes = $this->loadQuotes();
-        
+
         if (!isset($quotes[$cycle]) || empty($quotes[$cycle])) {
-            // Fallback to general quotes
             $cycle = 'general';
         }
-        
-        $cycleQuotes = $quotes[$cycle];
+
+        $cycleQuotes = $quotes[$cycle] ?? [];
+        if (empty($cycleQuotes)) {
+            return ['text' => 'Keep going.', 'author' => ''];
+        }
+
         $randomIndex = array_rand($cycleQuotes);
-        
         return $cycleQuotes[$randomIndex];
     }
-    
-    private function getImageForCycle($cycle) {
+
+    private function getImageForCycle(string $cycle): array {
         $images = $this->loadImages();
-        
+
         if (!isset($images[$cycle]) || empty($images[$cycle])) {
-            // Fallback to general images
             $cycle = 'general';
         }
-        
-        $cycleImages = $images[$cycle];
+
+        $cycleImages = $images[$cycle] ?? [];
+        if (empty($cycleImages)) {
+            return ['url' => '', 'description' => ''];
+        }
+
         $randomIndex = array_rand($cycleImages);
-        
         return $cycleImages[$randomIndex];
     }
-    
-    private function loadQuotes() {
+
+    private function loadQuotes(): array {
         if (!file_exists($this->quotesFile)) {
-            $this->createDefaultQuotes();
+            return $this->createDefaultQuotes();
         }
-        
-        return json_decode(file_get_contents($this->quotesFile), true);
+
+        $data = json_decode(file_get_contents($this->quotesFile), true);
+        return is_array($data) ? $data : [];
     }
-    
-    private function loadImages() {
+
+    private function loadImages(): array {
         if (!file_exists($this->imagesFile)) {
-            $this->createDefaultImages();
+            return $this->createDefaultImages();
         }
-        
-        return json_decode(file_get_contents($this->imagesFile), true);
+
+        $data = json_decode(file_get_contents($this->imagesFile), true);
+        return is_array($data) ? $data : [];
     }
-    
-    private function createDefaultQuotes() {
+
+    private function createDefaultQuotes(): array {
         $defaultQuotes = [
             'physical' => [
                 ['text' => 'Take care of your body. It\'s the only place you have to live.', 'author' => 'Jim Rohn'],
@@ -94,16 +120,16 @@ class InspirationManager {
                 ['text' => 'The only way to do great work is to love what you do.', 'author' => 'Steve Jobs']
             ]
         ];
-        
-        if (!is_dir('data')) {
-            mkdir('data', 0755, true);
+
+        if (!is_dir(DATA_DIR)) {
+            mkdir(DATA_DIR, 0755, true);
         }
-        
-        file_put_contents($this->quotesFile, json_encode($defaultQuotes, JSON_PRETTY_PRINT));
+
+        file_put_contents($this->quotesFile, json_encode($defaultQuotes, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         return $defaultQuotes;
     }
-    
-    private function createDefaultImages() {
+
+    private function createDefaultImages(): array {
         $defaultImages = [
             'physical' => [
                 ['url' => 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop', 'description' => 'Person running at sunrise'],
@@ -134,12 +160,12 @@ class InspirationManager {
                 ['url' => 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=250&fit=crop', 'description' => 'Peaceful natural scene']
             ]
         ];
-        
-        if (!is_dir('data')) {
-            mkdir('data', 0755, true);
+
+        if (!is_dir(DATA_DIR)) {
+            mkdir(DATA_DIR, 0755, true);
         }
-        
-        file_put_contents($this->imagesFile, json_encode($defaultImages, JSON_PRETTY_PRINT));
+
+        file_put_contents($this->imagesFile, json_encode($defaultImages, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         return $defaultImages;
     }
 }
@@ -147,16 +173,46 @@ class InspirationManager {
 // Handle POST request
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
-    
+
     if (!isset($input['cycle']) || empty($input['cycle'])) {
+        http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Cycle type is required']);
         exit;
     }
-    
+
     try {
         $inspirationManager = new InspirationManager();
         $inspiration = $inspirationManager->getInspiration($input['cycle']);
-        
+
+        // ✅ User data folder convention: /data/users/{user_id}/
+        // Log user-specific inspiration history to: /data/users/{user_id}/inspiration.json
+        $userDir = DATA_DIR . '/users/' . $_SESSION['user_id'];
+        if (!is_dir($userDir)) {
+            mkdir($userDir, 0755, true);
+        }
+
+        $logFile = $userDir . '/inspiration.json';
+        $logs = [];
+        if (file_exists($logFile)) {
+            $logs = json_decode(file_get_contents($logFile), true);
+            if (!is_array($logs)) {
+                $logs = [];
+            }
+        }
+
+        $logs[] = [
+            'timestamp' => date('c'),
+            'cycle' => $inspiration['cycle'],
+            'quote' => $inspiration['quote'],
+            'image' => $inspiration['image']
+        ];
+
+        if (count($logs) > 200) {
+            $logs = array_slice($logs, -200);
+        }
+
+        file_put_contents($logFile, json_encode($logs, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
         echo json_encode([
             'success' => true,
             'quote' => $inspiration['quote'],
@@ -164,11 +220,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'cycle' => $inspiration['cycle'],
             'timestamp' => date('Y-m-d H:i:s')
         ]);
-        
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
 } else {
+    http_response_code(405);
     echo json_encode(['success' => false, 'error' => 'Only POST method allowed']);
 }
-?>

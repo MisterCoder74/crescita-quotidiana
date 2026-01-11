@@ -1,8 +1,18 @@
 <?php
+require_once __DIR__ . '/config.php';
+session_start();
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
+
+// ✅ Controllo autenticazione
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Not authorized']);
+    exit;
+}
 
 try {
     // Leggi i dati JSON inviati
@@ -13,8 +23,17 @@ try {
         throw new Exception('Dati non validi');
     }
     
-    // Nome del file JSON
-    $filename = './data/biorhythms_data.json';
+    // ✅ User data folder convention: /data/users/{user_id}/
+    // All user-specific data must be stored using $_SESSION['user_id']
+    $userDir = DATA_DIR . '/users/' . $_SESSION['user_id'];
+    
+    // Crea la cartella utente se non esiste
+    if (!is_dir($userDir)) {
+        mkdir($userDir, 0755, true);
+    }
+    
+    // Nome del file JSON user-specific
+    $filename = $userDir . '/biorhythms.json';
     
     // Leggi i dati esistenti o crea array vuoto
     $existingData = [];
@@ -30,7 +49,7 @@ try {
     // Aggiungi i nuovi dati
     $existingData[] = $data;
     
-    // Salva nel file JSON
+    // Salva nel file JSON dell'utente
     $jsonString = json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     
     if (file_put_contents($filename, $jsonString) !== false) {
@@ -40,6 +59,7 @@ try {
     }
     
 } catch (Exception $e) {
+    http_response_code(400);
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
 ?>

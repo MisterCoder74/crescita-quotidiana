@@ -36,7 +36,19 @@ $u['citta_nascita'] = trim($_POST['citta_nascita']);
 // Aggiorna timestamp
 $u['updated_at'] = date('c');
 
-// (Facoltativo) aggiorna la cartella utente se necessario
+// Also update session variables so they're available immediately
+if (isset($_POST['data_nascita'])) {
+    $_SESSION['data_nascita'] = trim($_POST['data_nascita']);
+}
+if (isset($_POST['ora_nascita'])) {
+    $_SESSION['ora_nascita'] = trim($_POST['ora_nascita']);
+}
+if (isset($_POST['citta_nascita'])) {
+    $_SESSION['citta_nascita'] = trim($_POST['citta_nascita']);
+}
+
+// ✅ User data folder convention: /data/users/{user_id}/
+// All user-specific data must be stored using $_SESSION['user_id']
 $userDir = DATA_DIR . '/users/' . $_SESSION['user_id'];
 if (!is_dir($userDir)) {
 mkdir($userDir, 0755, true);

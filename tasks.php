@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/config.php';
 session_start();
 
 header('Content-Type: application/json');
@@ -18,9 +19,8 @@ echo json_encode(['error' => 'Not authorized']);
 exit;
 }
 
-require_once __DIR__ . '/config.php';
-
-// Percorso cartella utente
+// ✅ User data folder convention: /data/users/{user_id}/
+// All user-specific data must be stored using $_SESSION['user_id']
 $userDir = DATA_DIR . '/users/' . $_SESSION['user_id'];
 
 // Crea la cartella utente se non esiste

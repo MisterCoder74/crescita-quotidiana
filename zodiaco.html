@@ -1,0 +1,602 @@
+<?php
+ini_set('session.name', 'LC_IDENTIFIER');
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: index.html');
+    exit;
+}
+
+// Definisci la directory dei dati
+define('DATA_DIR', __DIR__ . '/data');
+
+// Carica i dati del profilo utente
+$userDir = DATA_DIR . '/users/' . $_SESSION['user_id'];
+$fileDir = $userDir . '/profile.json';
+
+if (file_exists($fileDir)) {
+    $profileData = json_decode(file_get_contents($fileDir), true);
+    
+    // Carica tutti i dati in sessione
+    if ($profileData) {
+        $_SESSION['name'] = $profileData['name'] ?? $_SESSION['name'] ?? 'User';
+        $_SESSION['email'] = $profileData['email'] ?? $_SESSION['email'] ?? '';
+        $_SESSION['profile_picture'] = $profileData['profile_picture'] ?? $_SESSION['profile_picture'] ?? '';
+        $_SESSION['data_nascita'] = $profileData['data_nascita'] ?? $_SESSION['data_nascita'] ?? '';
+        $_SESSION['ora_nascita'] = $profileData['ora_nascita'] ?? $_SESSION['ora_nascita'] ?? '';
+        $_SESSION['citta_nascita'] = $profileData['citta_nascita'] ?? $_SESSION['citta_nascita'] ?? '';
+        
+        // Carica eventuali altri campi presenti nel JSON
+        foreach ($profileData as $key => $value) {
+            if (!isset($_SESSION[$key])) {
+                $_SESSION[$key] = $value;
+            }
+        }
+    }
+}
+
+// Usa i dati dalla sessione
+$username = $_SESSION['name'] ?? $_SESSION['email'] ?? 'User';
+$userEmail = $_SESSION['email'] ?? '';
+$userPicture = $_SESSION['profile_picture'] ?? '';
+$birthdate = $_SESSION['data_nascita'] ?? '';
+$birthTime = $_SESSION['ora_nascita'] ?? '';
+$birthCity = $_SESSION['citta_nascita'] ?? '';
+?>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Segno Zodiacale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1em;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 1em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-note {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.3);
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
+            margin-left: 15px;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+
+        .result-header h2 {
+            font-size: 2em;
+            color: #333;
+        }
+
+        .zodiac-symbol {
+            font-size: 3em;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-badge {
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .element-fire { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white; }
+        .element-earth { background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); color: white; }
+        .element-air { background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%); color: white; }
+        .element-water { background: linear-gradient(135deg, #845ef7 0%, #7048e8 100%); color: white; }
+
+        .traits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .trait-box {
+            padding: 20px;
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+
+        .trait-box h4 {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #495057;
+        }
+
+        .trait-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .houses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .house-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            transition: transform 0.3s;
+        }
+
+        .house-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .house-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .house-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .house-sign {
+            font-size: 2em;
+        }
+
+        .house-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .house-meaning {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .house-ruler {
+            padding: 8px 12px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 8px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        .combination-box {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .combination-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .combination-box p {
+            line-height: 1.7;
+            font-size: 1.05em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .save-btn {
+                margin-left: 0;
+                margin-top: 10px;
+                display: block;
+                width: 100%;
+            }
+
+            .info-grid, .traits-grid, .houses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>♒ Segno Zodiacale</h1>
+            <p>Scopri il tuo Segno Solare e le sue caratteristiche</p>
+            <a href="dashboard.php" class="back-link">← Torna alla Dashboard</a>
+        </div>
+
+        <div class="input-section">
+            <div id="zodiacForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">Nome:</label>
+                        <input type="text" id="name" value="<?php echo htmlspecialchars($username); ?>" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="birthdate">Data di Nascita:</label>
+                        <input type="date" id="birthdate" required value="<?php echo htmlspecialchars($birthdate); ?>" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="results" class="results-section"></div>
+    </div>
+
+    <script>
+        const zodiacSigns = [
+            { name: 'Ariete', start: [3, 21], end: [4, 19], element: 'Fuoco', quality: 'Cardinale', ruler: 'Marte', symbol: '♈' },
+            { name: 'Toro', start: [4, 20], end: [5, 20], element: 'Terra', quality: 'Fisso', ruler: 'Venere', symbol: '♉' },
+            { name: 'Gemelli', start: [5, 21], end: [6, 20], element: 'Aria', quality: 'Mutevole', ruler: 'Mercurio', symbol: '♊' },
+            { name: 'Cancro', start: [6, 21], end: [7, 22], element: 'Acqua', quality: 'Cardinale', ruler: 'Luna', symbol: '♋' },
+            { name: 'Leone', start: [7, 23], end: [8, 22], element: 'Fuoco', quality: 'Fisso', ruler: 'Sole', symbol: '♌' },
+            { name: 'Vergine', start: [8, 23], end: [9, 22], element: 'Terra', quality: 'Mutevole', ruler: 'Mercurio', symbol: '♍' },
+            { name: 'Bilancia', start: [9, 23], end: [10, 22], element: 'Aria', quality: 'Cardinale', ruler: 'Venere', symbol: '♎' },
+            { name: 'Scorpione', start: [10, 23], end: [11, 21], element: 'Acqua', quality: 'Fisso', ruler: 'Plutone', symbol: '♏' },
+            { name: 'Sagittario', start: [11, 22], end: [12, 21], element: 'Fuoco', quality: 'Mutevole', ruler: 'Giove', symbol: '♐' },
+            { name: 'Capricorno', start: [12, 22], end: [1, 19], element: 'Terra', quality: 'Cardinale', ruler: 'Saturno', symbol: '♑' },
+            { name: 'Acquario', start: [1, 20], end: [2, 18], element: 'Aria', quality: 'Fisso', ruler: 'Urano', symbol: '♒' },
+            { name: 'Pesci', start: [2, 19], end: [3, 20], element: 'Acqua', quality: 'Mutevole', ruler: 'Nettuno', symbol: '♓' }
+        ];
+
+        const signDescriptions = {
+            'Ariete': {
+                traits: 'Coraggioso, energico, impulsivo, leader nato',
+                strengths: 'Determinazione, coraggio, entusiasmo, ottimismo',
+                challenges: 'Impazienza, impulsività, tendenza alla competizione',
+                career: 'Imprenditoria, sport, leadership, carriere dinamiche'
+            },
+            'Toro': {
+                traits: 'Stabile, pratico, affidabile, amante del comfort',
+                strengths: 'Pazienza, lealtà, determinazione, senso pratico',
+                challenges: 'Testardaggine, possessività, resistenza al cambiamento',
+                career: 'Finanza, arte, gastronomia, settore immobiliare'
+            },
+            'Gemelli': {
+                traits: 'Versatile, comunicativo, curioso, adattabile',
+                strengths: 'Intelligenza, comunicazione, adattabilità, umorismo',
+                challenges: 'Superficialità, instabilità, nervosismo',
+                career: 'Giornalismo, vendite, insegnamento, social media'
+            },
+            'Cancro': {
+                traits: 'Emotivo, protettivo, intuitivo, sensibile',
+                strengths: 'Empatia, intuizione, lealtà familiare, creatività',
+                challenges: 'Ipersensibilità, tendenza a chiudersi, sbalzi d\'umore',
+                career: 'Assistenza, ristorazione, immobiliare, arte'
+            },
+            'Leone': {
+                traits: 'Carismatico, generoso, orgoglioso, creativo',
+                strengths: 'Generosità, leadership, creatività, ottimismo',
+                challenges: 'Orgoglio, bisogno di attenzione, drammaticità',
+                career: 'Spettacolo, management, moda, politica'
+            },
+            'Vergine': {
+                traits: 'Analitico, perfezionista, pratico, metodico',
+                strengths: 'Precisione, analisi, praticità, affidabilità',
+                challenges: 'Perfezionismo eccessivo, tendenza alla critica, ansia',
+                career: 'Sanità, analisi dati, editing, amministrazione'
+            },
+            'Bilancia': {
+                traits: 'Equilibrato, diplomatico, raffinato, sociale',
+                strengths: 'Diplomazia, senso estetico, giustizia, socievolezza',
+                challenges: 'Indecisione, tendenza a evitare conflitti, superficialità',
+                career: 'Giurisprudenza, diplomazia, design, relazioni pubbliche'
+            },
+            'Scorpione': {
+                traits: 'Intenso, magnetico, profondo, trasformativo',
+                strengths: 'Intensità, intuizione, determinazione, lealtà',
+                challenges: 'Possessività, gelosia, tendenza al controllo',
+                career: 'Psicologia, investigazione, chirurgia, finanza'
+            },
+            'Sagittario': {
+                traits: 'Ottimista, avventuroso, filosofico, libero',
+                strengths: 'Ottimismo, saggezza, libertà, onestà',
+                challenges: 'Imprudenza, mancanza di tatto, irrequietezza',
+                career: 'Viaggi, insegnamento, editoria, sport'
+            },
+            'Capricorno': {
+                traits: 'Ambizioso, disciplinato, responsabile, pragmatico',
+                strengths: 'Ambizione, disciplina, responsabilità, pazienza',
+                challenges: 'Rigidità, pessimismo, eccessiva serietà',
+                career: 'Management, politica, architettura, finanza'
+            },
+            'Acquario': {
+                traits: 'Originale, umanitario, indipendente, visionario',
+                strengths: 'Originalità, umanitarismo, intelligenza, indipendenza',
+                challenges: 'Distacco emotivo, testardaggine, imprevedibilità',
+                career: 'Tecnologia, scienze sociali, innovazione, attivismo'
+            },
+            'Pesci': {
+                traits: 'Empatico, artistico, spirituale, intuitivo',
+                strengths: 'Compassione, creatività, intuizione, adattabilità',
+                challenges: 'Eccessiva sensibilità, tendenza alla fuga, confusione',
+                career: 'Arte, musica, assistenza sanitaria, spiritualità'
+            }
+        };
+
+        const houses = [
+            { number: 1, name: 'Casa dell\'Io', meaning: 'Personalità, aspetto fisico, approccio alla vita' },
+            { number: 2, name: 'Casa delle Risorse', meaning: 'Denaro, valori personali, possedimenti materiali' },
+            { number: 3, name: 'Casa della Comunicazione', meaning: 'Fratelli, comunicazione, apprendimento, viaggi brevi' },
+            { number: 4, name: 'Casa delle Radici', meaning: 'Famiglia, casa, origini, sicurezza emotiva' },
+            { number: 5, name: 'Casa della Creatività', meaning: 'Amore, creatività, figli, divertimento' },
+            { number: 6, name: 'Casa del Lavoro', meaning: 'Salute, routine quotidiana, servizio agli altri' },
+            { number: 7, name: 'Casa delle Relazioni', meaning: 'Matrimonio, partnership, contratti' },
+            { number: 8, name: 'Casa della Trasformazione', meaning: 'Trasformazione, eredità, sessualità, morte e rinascita' },
+            { number: 9, name: 'Casa della Filosofia', meaning: 'Viaggi lunghi, filosofia, educazione superiore' },
+            { number: 10, name: 'Casa della Carriera', meaning: 'Carriera, status sociale, ambizioni' },
+            { number: 11, name: 'Casa dell\'Amicizia', meaning: 'Amicizie, gruppi, aspirazioni, ideali' },
+            { number: 12, name: 'Casa del Subconscio', meaning: 'Subconscio, spiritualità, isolamento, segreti' }
+        ];
+
+        function getZodiacSign(date) {
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            
+            for (const sign of zodiacSigns) {
+                const [startMonth, startDay] = sign.start;
+                const [endMonth, endDay] = sign.end;
+                
+                if (startMonth === endMonth) {
+                    if (month === startMonth && day >= startDay && day <= endDay) return sign;
+                } else {
+                    if ((month === startMonth && day >= startDay) || (month === endMonth && day <= endDay)) {
+                        return sign;
+                    }
+                }
+            }
+            return zodiacSigns[0];
+        }
+
+        function calculateAscendant(birthTime, birthDate, latitude = 40.73) {
+            return null; // Rimosso calcolo ascendente
+        }
+
+        function calculateHousePositions(ascendant) {
+            return []; // Rimosso calcolo case
+        }
+
+        function getElementClass(element) {
+            const classes = {
+                'Fuoco': 'element-fire',
+                'Terra': 'element-earth',
+                'Aria': 'element-air',
+                'Acqua': 'element-water'
+            };
+            return classes[element] || 'element-fire';
+        }
+
+        function calculateZodiac() {
+            const birthdate = document.getElementById('birthdate').value;
+            const name = document.getElementById('name').value;
+
+            if (!birthdate) {
+                return; // Nessun calcolo se manca la data
+            }
+
+            const date = new Date(birthdate);
+            const sunSign = getZodiacSign(date);
+            
+            displayResults(sunSign, null, null, name, date, null);
+        }
+
+        function displayResults(sunSign, ascendant, birthTime, name, date, birthCity) {
+            const resultsDiv = document.getElementById('results');
+            const desc = signDescriptions[sunSign.name];
+            
+            let html = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <span class="zodiac-symbol">${sunSign.symbol}</span>
+                        <div>
+                            <h2>Segno Solare: ${sunSign.name}</h2>
+                            <p style="color: #666;">Nato il ${date.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-badge ${getElementClass(sunSign.element)}">
+                            🔥 Elemento: ${sunSign.element}
+                        </div>
+                        <div class="info-badge ${getElementClass(sunSign.element)}">
+                            ⚡ Qualità: ${sunSign.quality}
+                        </div>
+                        <div class="info-badge ${getElementClass(sunSign.element)}">
+                            👑 Pianeta: ${sunSign.ruler}
+                        </div>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                        <h3 style="margin-bottom: 12px;">Caratteristiche Principali</h3>
+                        <p style="font-size: 1.1em; color: #495057; line-height: 1.7;">${desc.traits}</p>
+                    </div>
+
+                    <div class="traits-grid">
+                        <div class="trait-box" style="background: #d3f9d8;">
+                            <h4>💪 Punti di Forza</h4>
+                            <p>${desc.strengths}</p>
+                        </div>
+                        <div class="trait-box" style="background: #ffe8cc;">
+                            <h4>⚠️ Sfide da Affrontare</h4>
+                            <p>${desc.challenges}</p>
+                        </div>
+                        <div class="trait-box" style="background: #d0ebff;">
+                            <h4>💼 Carriera Ideale</h4>
+                            <p>${desc.career}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        function saveZodiacData() {
+            // Funzione rimossa - salvataggio automatico non più necessario
+        }
+
+        // Auto-calcola al caricamento della pagina
+        window.addEventListener('DOMContentLoaded', function() {
+            const birthdate = document.getElementById('birthdate').value;
+            if (birthdate) {
+                calculateZodiac();
+            }
+        });
+    </script>
+</body>
+</html>

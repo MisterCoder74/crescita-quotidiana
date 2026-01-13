@@ -17,7 +17,7 @@ $birthdate = $_SESSION['data_nascita'] ?? '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crescita Quotidiana - Dashboard</title>
+    <title>Crescita Quotidiana 2.0 - Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -246,7 +246,7 @@ min-width:300px;
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>Crescita Quotidiana</h1>
+            <h1>Crescita Quotidiana 2.0 <small>(versione multi-utente)</small></h1>
             <p>Il tuo percorso verso una versione migliore di te stesso</p>
                 <h2>Benvenuto, <?php echo htmlspecialchars($username); ?></h2>
                 <button id="editProfileBtn" class="home-link">Modifica Profilo</button>
@@ -283,6 +283,13 @@ min-width:300px;
                 <p>Genera e scarica Mandala floreali e geometrici per migliorare il tuo focus e la tua meditazione; guardali animarsi e pulsare davanti a te.</p>
                 <button class="tool-button" onclick="navigateToTool('mandala.html')">Genera Mandala</button>
             </div> 
+                
+            <div class="tool-card">
+                <div class="tool-icon">♒</div>
+                <h3>Zodiaco</h3>
+                <p>Scopri il tuo Segno Zodiacale! Dalla tua data di nascita puoi scoprire il tuo Segno, le sue caratteristiche, i punti di forza e deboli.</p>
+                <button class="tool-button" onclick="navigateToTool('zodiaco.html')">Scopri il tuo Segno</button>
+            </div>                 
                 
             <div class="tool-card">
                 <div class="tool-icon">🏥</div>

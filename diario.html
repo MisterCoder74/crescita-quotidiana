@@ -1,0 +1,756 @@
+<?php
+ini_set('session.name', 'LC_IDENTIFIER');
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: index.html');
+    exit;
+}
+
+$username = $_SESSION['name'] ?? $_SESSION['email'] ?? 'User';
+$userPicture = $_SESSION['profile_picture'] ?? '';
+?>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diario Personale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header-left .current-date {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .header-right a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .header-right a:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            padding: 40px 30px;
+        }
+
+        .entry-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .gradient-selector {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .gradient-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .gradient-option {
+            height: 60px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gradient-option:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .gradient-option.selected {
+            border-color: #333;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .gradient-option.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .gradient-serenity { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gradient-warmth { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .gradient-nature { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .gradient-passion { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .gradient-calm { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .gradient-golden { background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); }
+        .gradient-forest { background: linear-gradient(135deg, #134e5e 0%, #71b280 100%); }
+        .gradient-twilight { background: linear-gradient(135deg, #2E3192 0%, #1BFFFF 100%); }
+        .gradient-sunset { background: linear-gradient(135deg, #FF512F 0%, #F09819 100%); }
+        .gradient-ocean { background: linear-gradient(135deg, #2E3192 0%, #1BFFFF 100%); }
+
+        .gradient-label {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .text-area-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #journalContent {
+            width: 100%;
+            min-height: 400px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        #journalContent:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .character-counter {
+            text-align: right;
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            margin-top: 20px;
+            align-self: flex-start;
+        }
+
+        .save-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .side-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .entries-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .entry-item {
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+
+        .entry-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .entry-date {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .entry-preview {
+            color: #333;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .entry-gradient-preview {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+            font-style: italic;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            max-width: 700px;
+            width: 100%;
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            color: white;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUpModal 0.4s ease;
+        }
+
+        @keyframes slideUpModal {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: rotate(90deg);
+        }
+
+        .modal-date {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .modal-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideDown 0.4s ease;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .side-panel {
+                max-height: 500px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+
+            .header-left h1 {
+                font-size: 1.5rem;
+            }
+
+            .main-content {
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .gradient-options {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 10px;
+            }
+
+            .gradient-option {
+                height: 50px;
+            }
+
+            #journalContent {
+                min-height: 300px;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>🏠 Diario Personale</h1>
+                <div class="current-date" id="currentDateTime"></div>
+            </div>
+            <div class="header-right">
+                <a href="dashboard.php">← Torna alla Dashboard</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="entry-panel">
+                <div class="gradient-selector">
+                    <h3 class="section-title">Scegli il Colore del tuo Diario</h3>
+                    <div class="gradient-options">
+                        <div>
+                            <div class="gradient-option gradient-serenity" data-gradient="gradient-serenity"></div>
+                            <div class="gradient-label">Serenità</div>
+                        </div>
+                        <div>
+                            <div class="gradient-option gradient-warmth" data-gradient="gradient-warmth"></div>
+                            <div class="gradient-label">Calore</div>
+                        </div>
+                        <div>
+                            <div class="gradient-option gradient-nature" data-gradient="gradient-nature"></div>
+                            <div class="gradient-label">Natura</div>
+                        </div>
+                        <div>
+                            <div class="gradient-option gradient-passion" data-gradient="gradient-passion"></div>
+                            <div class="gradient-label">Passione</div>
+                        </div>
+                        <div>
+                            <div class="gradient-option gradient-calm" data-gradient="gradient-calm"></div>
+                            <div class="gradient-label">Calma</div>
+                        </div>
+                        <div>
+                            <div class="gradient-option gradient-golden" data-gradient="gradient-golden"></div>
+                            <div class="gradient-label">Oro</div>
+                        </div>
+                        <div>
+                            <div class="gradient-option gradient-forest" data-gradient="gradient-forest"></div>
+                            <div class="gradient-label">Foresta</div>
+                        </div>
+                        <div>
+                            <div class="gradient-option gradient-twilight" data-gradient="gradient-twilight"></div>
+                            <div class="gradient-label">Crepuscolo</div>
+                        </div>
+                        <div>
+                            <div class="gradient-option gradient-sunset" data-gradient="gradient-sunset"></div>
+                            <div class="gradient-label">Tramonto</div>
+                        </div>
+                        <div>
+                            <div class="gradient-option gradient-ocean" data-gradient="gradient-ocean"></div>
+                            <div class="gradient-label">Oceano</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-area-container">
+                    <h3 class="section-title">Scrivi il tuo Diario</h3>
+                    <textarea id="journalContent" placeholder="Scrivi il tuo diario personale qui..."></textarea>
+                    <div class="character-counter" id="charCounter">0 caratteri</div>
+                    <button class="save-btn" id="saveBtn" disabled>💾 Salva Diario</button>
+                    <div class="success-message" id="successMessage">✅ Diario salvato con successo!</div>
+                </div>
+            </div>
+
+            <div class="side-panel">
+                <h3 class="section-title">I miei Diari</h3>
+                <div class="entries-list" id="entriesList">
+                    <div class="empty-state">Caricamento...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="entryModal">
+        <div class="modal-content" id="modalContent">
+            <button class="modal-close" id="modalClose">×</button>
+            <div class="modal-date" id="modalDate"></div>
+            <div class="modal-text" id="modalText"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedGradient = '';
+        let allEntries = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateTime();
+            setInterval(updateDateTime, 60000); // Update every minute
+            loadEntries();
+            setupEventListeners();
+        });
+
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateStr = now.toLocaleDateString('it-IT', options);
+            const timeStr = now.toLocaleTimeString('it-IT', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+            document.getElementById('currentDateTime').textContent = `${formattedDate} - ${timeStr}`;
+        }
+
+        function setupEventListeners() {
+            // Gradient selection
+            document.querySelectorAll('.gradient-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    selectGradient(this.dataset.gradient);
+                });
+            });
+
+            // Text area input
+            const textarea = document.getElementById('journalContent');
+            const charCounter = document.getElementById('charCounter');
+            const saveBtn = document.getElementById('saveBtn');
+
+            textarea.addEventListener('input', function() {
+                const length = this.value.length;
+                charCounter.textContent = `${length} caratteri`;
+                
+                // Enable/disable save button
+                saveBtn.disabled = this.value.trim() === '' || selectedGradient === '';
+            });
+
+            // Save button
+            saveBtn.addEventListener('click', saveEntry);
+
+            // Modal close
+            document.getElementById('modalClose').addEventListener('click', closeModal);
+            document.getElementById('entryModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        }
+
+        function selectGradient(gradientName) {
+            selectedGradient = gradientName;
+            
+            // Update UI
+            document.querySelectorAll('.gradient-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-gradient="${gradientName}"]`).classList.add('selected');
+            
+            // Check if save button should be enabled
+            const textarea = document.getElementById('journalContent');
+            document.getElementById('saveBtn').disabled = textarea.value.trim() === '' || selectedGradient === '';
+        }
+
+        function saveEntry() {
+            const content = document.getElementById('journalContent').value.trim();
+            
+            if (!content || !selectedGradient) {
+                alert('Per favore, scrivi qualcosa e seleziona un colore!');
+                return;
+            }
+
+            const data = {
+                content: content,
+                gradient: selectedGradient
+            };
+
+            fetch('php/save_journal_entry.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                cache: 'no-store',
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const successMsg = document.getElementById('successMessage');
+                    successMsg.classList.add('show');
+                    setTimeout(() => {
+                        successMsg.classList.remove('show');
+                    }, 3000);
+
+                    // Clear form
+                    document.getElementById('journalContent').value = '';
+                    document.getElementById('charCounter').textContent = '0 caratteri';
+                    document.querySelectorAll('.gradient-option').forEach(option => {
+                        option.classList.remove('selected');
+                    });
+                    selectedGradient = '';
+                    document.getElementById('saveBtn').disabled = true;
+
+                    // Reload entries
+                    loadEntries();
+                } else {
+                    alert('Errore nel salvataggio: ' + (data.error || 'Errore sconosciuto'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errore nel salvataggio del diario');
+            });
+        }
+
+        function loadEntries() {
+            fetch('php/get_journal_entries.php', { cache: 'no-store' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        allEntries = data.entries || [];
+                        displayEntries(allEntries);
+                    } else {
+                        console.error('Error loading entries:', data.error);
+                        document.getElementById('entriesList').innerHTML = 
+                            '<div class="empty-state">Errore nel caricamento dei diari.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading entries:', error);
+                    document.getElementById('entriesList').innerHTML = 
+                        '<div class="empty-state">Errore nel caricamento dei diari.</div>';
+                });
+        }
+
+        function displayEntries(entries) {
+            const entriesList = document.getElementById('entriesList');
+            
+            if (entries.length === 0) {
+                entriesList.innerHTML = '<div class="empty-state">Nessun diario salvato ancora.<br>Inizia a scrivere!</div>';
+                return;
+            }
+
+            entriesList.innerHTML = entries.map(entry => {
+                const preview = entry.content.length > 50 
+                    ? entry.content.substring(0, 50) + '...' 
+                    : entry.content;
+                
+                return `
+                    <div class="entry-item" onclick="openEntryModal('${entry.id}')">
+                        <div class="entry-date">${formatDate(entry.date, entry.time)}</div>
+                        <div class="entry-preview">${escapeHtml(preview)}</div>
+                        <div class="entry-gradient-preview ${entry.gradient}"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatDate(date, time) {
+            const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 
+                          'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+            
+            const [year, month, day] = date.split('-');
+            const monthName = months[parseInt(month) - 1];
+            
+            return `${parseInt(day)} ${monthName} ${year} - ${time}`;
+        }
+
+        function openEntryModal(entryId) {
+            const entry = allEntries.find(e => e.id === entryId);
+            if (!entry) return;
+
+            const modal = document.getElementById('entryModal');
+            const modalContent = document.getElementById('modalContent');
+            const modalDate = document.getElementById('modalDate');
+            const modalText = document.getElementById('modalText');
+
+            // Set gradient background
+            modalContent.className = `modal-content ${entry.gradient}`;
+            
+            // Set content
+            modalDate.textContent = formatDate(entry.date, entry.time);
+            modalText.textContent = entry.content;
+
+            // Show modal
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('entryModal').classList.remove('active');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Keyboard shortcut to close modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

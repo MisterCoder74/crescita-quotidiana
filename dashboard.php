@@ -298,6 +298,13 @@ min-width:300px;
                 <button class="tool-button" onclick="navigateToTool('alimentazione.html')">Avvia l'Assistente</button>
             </div>                  
 
+            <div class="tool-card">
+                <div class="tool-icon">📖</div>
+                <h3>Diario Personale</h3>
+                <p>Scrivi il tuo diario personale con colori personalizzati. Registra i tuoi pensieri, emozioni e riflessioni quotidiane in un ambiente privato e sicuro.</p>
+                <button class="tool-button" onclick="navigateToTool('diario.html')">Apri Diario</button>
+            </div>
+
 
         </main>
 

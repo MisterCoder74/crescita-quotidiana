@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crescita Quotidiana - Dashboard</title>
+    <title>Crescita Quotidiana 2.0 - Accesso</title>
     <style>
         * {
             margin: 0;
@@ -78,6 +77,7 @@
             backdrop-filter: blur(15px);
             border-radius: 20px;
             padding: 30px;
+                 text-align: center;
             box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
@@ -110,6 +110,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+               
             font-size: 1.8rem;
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
@@ -184,11 +185,15 @@
         }
             
             .login-box {
-    background: white;
+    background: transparent;
+                    color: white;
     border-radius: 8px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     padding: 40px;
-    text-align: center;
+    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    flex-direction: column;
 }
 
 .login-box h1 {
@@ -198,8 +203,10 @@
 }
 
 .login-box p {
-    color: #666;
+    color: white;
+        font-size: 1.2rem;
     margin-bottom: 30px;
+        
 }
 
         /* Responsive */
@@ -247,7 +254,7 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>Crescita Quotidiana</h1>
+            <h1>Crescita Quotidiana 2.0 <small>(versione multi-utente)</small></h1>
             <p>Il tuo percorso verso una versione migliore di te stesso</p>
         </header>
 
@@ -258,11 +265,11 @@
                 <p>Organizza le tue giornate con efficacia. Pianifica, prioritizza e raggiungi i tuoi obiettivi quotidiani con il nostro sistema di gestione task intelligente.</p> 
                 
                 <p>Scopri i tuoi cicli naturali di energia fisica, emotiva e intellettuale. Ottimizza le tue performance conoscendo i tuoi ritmi biologici personali.</p>
-                        <div class="login-box">
+                         <div class="login-box"> 
                             
                             <p>Accedi con Google</p>
-                            <div id="google-signin-button"></div>
-                        </div>
+                            <div id="google-signin-button" style="margin: .25rem auto; align-self: center;"></div>
+                         </div> 
             </div>
 
         </main>
@@ -270,9 +277,9 @@
         <!-- Footer -->
         <footer class="footer">
             <div class="footer-content">
-                <h4>Crescita Quotidiana</h4>
+                <h4>Crescita Quotidiana 2.0 <small>(versione multi-utente)</small></h4>
                 <p>La tua crescita personale inizia qui, un giorno alla volta.</p>
-                🏠 Ideato e realizzato da <a href="https://www.vivacitydesign.net/index.php" class="whitelink"> Vivacity Design </a> - Agosto 2025
+                🏠 Ideato e realizzato da <a href="https://www.vivacitydesign.net/index.php" class="whitelink"> Vivacity Design </a> - Agosto 2025 - Gennaio 2026
             </div>
         </footer>
     </div>
